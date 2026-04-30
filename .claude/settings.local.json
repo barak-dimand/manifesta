@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:bliss-board-creator.lovable.app)",
+      "Bash(gh repo *)",
+      "Bash(pnpm dlx *)",
+      "Bash(npm --version)",
+      "Bash(mkdir -p \"/Users/barakdimand/Desktop/TechStuff/manifesta/src/app/\\(auth\\)/sign-in/[[...sign-in]]\")",
+      "Bash(mkdir -p \"/Users/barakdimand/Desktop/TechStuff/manifesta/src/app/\\(auth\\)/sign-up/[[...sign-up]]\")",
+      "Bash(mkdir -p /Users/barakdimand/Desktop/TechStuff/manifesta/.husky)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

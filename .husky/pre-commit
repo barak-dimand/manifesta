@@ -1,0 +1,2 @@
+pnpm lint-staged
+which gitleaks > /dev/null 2>&1 && gitleaks detect --source . -v --no-git || true
