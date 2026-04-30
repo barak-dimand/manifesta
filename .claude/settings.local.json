@@ -8,7 +8,10 @@
       "Bash(mkdir -p \"/Users/barakdimand/Desktop/TechStuff/manifesta/src/app/\\(auth\\)/sign-in/[[...sign-in]]\")",
       "Bash(mkdir -p \"/Users/barakdimand/Desktop/TechStuff/manifesta/src/app/\\(auth\\)/sign-up/[[...sign-up]]\")",
       "Bash(mkdir -p /Users/barakdimand/Desktop/TechStuff/manifesta/.husky)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(cat)",
+      "Bash(git -C /Users/barakdimand/Desktop/TechStuff/manifesta add .husky/commit-msg)",
+      "Bash(git -C /Users/barakdimand/Desktop/TechStuff/manifesta commit -m 'chore: fix husky v10 commit-msg hook format *)"
     ]
   }
 }

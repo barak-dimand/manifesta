@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Briefcase,
   Heart,
@@ -9,10 +10,12 @@ import {
   TrendingUp,
   Palette,
   Check,
+  Wand2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { DreamExplorer } from './DreamExplorer';
 import type { WizardState } from '@/hooks/use-wizard';
 import type { LifeArea } from '@/lib/validations/wizard';
 import { cn } from '@/lib/utils';
@@ -38,6 +41,7 @@ const MIN_DREAMS = 10;
 
 export function Step1DreamLife({ state, update, next }: Step1Props) {
   const [dreamsError, setDreamsError] = useState('');
+  const [explorerOpen, setExplorerOpen] = useState(false);
 
   const toggleArea = (area: LifeArea) => {
     const current = state.selectedAreas;
@@ -58,8 +62,12 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
     next();
   };
 
-  const isValid =
-    state.selectedAreas.length > 0 && state.dreams.length >= MIN_DREAMS;
+  const handleExplorerComplete = (combinedDream: string) => {
+    update({ dreams: combinedDream });
+    setExplorerOpen(false);
+  };
+
+  const isValid = state.selectedAreas.length > 0 && state.dreams.length >= MIN_DREAMS;
 
   return (
     <div className="flex flex-col gap-8">
@@ -91,7 +99,7 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
                   'relative flex flex-col items-start gap-2 p-4 rounded-xl border-2 text-left transition-all duration-200 cursor-pointer',
                   selected
                     ? 'bg-sage border-sage text-white shadow-sm shadow-sage/25'
-                    : 'bg-cream border-sage/20 text-forest hover:border-sage/50 hover:bg-sage-light/50',
+                    : 'bg-cream border-sage/20 text-forest hover:border-sage/50 hover:bg-sage-light/50'
                 )}
               >
                 {selected && (
@@ -102,7 +110,7 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
                 <Icon
                   className={cn(
                     'w-5 h-5 transition-colors',
-                    selected ? 'text-white' : 'text-sage',
+                    selected ? 'text-white' : 'text-sage'
                   )}
                 />
                 <span className="font-sans text-sm font-medium leading-tight">{label}</span>
@@ -117,43 +125,89 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
         )}
       </div>
 
-      {/* Dream description */}
+      {/* Dream description — textarea or explorer */}
       <div className="flex flex-col gap-2">
-        <Label htmlFor="dreams" className="text-sm font-semibold text-forest/80">
-          Describe your dream life in your own words
-        </Label>
-        <Textarea
-          id="dreams"
-          value={state.dreams}
-          onChange={(e) => {
-            setDreamsError('');
-            update({ dreams: e.target.value.slice(0, MAX_DREAMS) });
-          }}
-          placeholder="Imagine waking up in your ideal life. Where are you? What does your day look like? How do you feel?"
-          className="min-h-[160px] text-sm leading-relaxed"
-        />
-        <div className="flex justify-between items-center">
-          {dreamsError ? (
-            <p className="text-xs text-red-500 font-sans">{dreamsError}</p>
-          ) : (
-            <span />
+        <div className="flex items-center justify-between">
+          <Label htmlFor="dreams" className="text-sm font-semibold text-forest/80">
+            Describe your dream life in your own words
+          </Label>
+          {!explorerOpen && (
+            <button
+              type="button"
+              onClick={() => setExplorerOpen(true)}
+              className="flex items-center gap-1.5 text-xs text-sage hover:text-sage/80 font-sans font-medium transition-colors"
+            >
+              <Wand2 className="h-3 w-3" />
+              Not sure what to write?
+            </button>
           )}
-          <span className="text-xs text-forest/40 font-sans ml-auto">
-            {state.dreams.length}/{MAX_DREAMS}
-          </span>
         </div>
+
+        <AnimatePresence mode="wait">
+          {explorerOpen ? (
+            <motion.div
+              key="explorer"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <DreamExplorer
+                onComplete={handleExplorerComplete}
+                onCancel={() => setExplorerOpen(false)}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="textarea"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col gap-2"
+            >
+              <Textarea
+                id="dreams"
+                value={state.dreams}
+                onChange={(e) => {
+                  setDreamsError('');
+                  update({ dreams: e.target.value.slice(0, MAX_DREAMS) });
+                }}
+                placeholder="Imagine waking up in your ideal life. Where are you? What does your day look like? How do you feel?"
+                className="min-h-[160px] text-sm leading-relaxed"
+              />
+              <div className="flex justify-between items-center">
+                {dreamsError ? (
+                  <p className="text-xs text-red-500 font-sans">{dreamsError}</p>
+                ) : (
+                  <span />
+                )}
+                <span className="text-xs text-forest/40 font-sans ml-auto">
+                  {state.dreams.length}/{MAX_DREAMS}
+                </span>
+              </div>
+              {state.dreams.length === 0 && (
+                <p className="text-xs text-forest/40 font-sans -mt-1">
+                  Tip: the more detail you give, the better your board will be.
+                </p>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* CTA */}
-      <Button
-        variant="gold"
-        size="lg"
-        className="w-full text-base"
-        onClick={handleNext}
-        disabled={!isValid}
-      >
-        Next: Photos &amp; Style →
-      </Button>
+      {/* CTA — only show when not in explorer mode */}
+      {!explorerOpen && (
+        <Button
+          variant="gold"
+          size="lg"
+          className="w-full text-base"
+          onClick={handleNext}
+          disabled={!isValid}
+        >
+          Next: Photos &amp; Style →
+        </Button>
+      )}
     </div>
   );
 }
