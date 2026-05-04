@@ -15,7 +15,7 @@ export default clerkMiddleware(async (auth, request) => {
   }
 });
 
-// Only run Clerk on routes that actually need auth.
+// Only run Clerk on routes that actually need auth. Public pages skip the handshake.
 // Excluding public pages (/, /create, /sign-in, /sign-up) prevents the
 // cross-domain handshake redirect that Clerk dev instances do on non-localhost.
 export const config = {
