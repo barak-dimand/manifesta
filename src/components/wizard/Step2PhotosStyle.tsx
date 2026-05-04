@@ -135,6 +135,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
           accept="image/*"
           multiple
           className="hidden"
+          data-testid="photo-file-input"
           onChange={handleFileChange}
         />
 
@@ -210,6 +211,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
               <motion.button
                 key={option.id}
                 type="button"
+                data-testid={`style-${option.id}`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => update({ style: option.id })}
@@ -334,7 +336,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
       </div>
 
       {/* CTA */}
-      <Button variant="gold" size="lg" className="w-full text-base" onClick={next}>
+      <Button variant="gold" size="lg" className="w-full text-base" onClick={next} data-testid="step2-next">
         Next: Goals →
       </Button>
 

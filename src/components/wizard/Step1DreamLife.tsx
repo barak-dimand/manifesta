@@ -99,6 +99,7 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
               <button
                 key={id}
                 type="button"
+                data-testid={`area-${id}`}
                 onClick={() => toggleArea(id)}
                 className={cn(
                   'relative flex flex-col items-start gap-2 p-4 rounded-xl border-2 text-left transition-all duration-200 cursor-pointer',
@@ -210,6 +211,7 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
           className="w-full text-base"
           onClick={handleNext}
           disabled={!isValid}
+          data-testid="step1-next"
         >
           Next: Photos &amp; Style →
         </Button>

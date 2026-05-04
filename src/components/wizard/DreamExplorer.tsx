@@ -261,7 +261,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
             <p className="font-sans text-xs text-forest/50 font-medium">
               Tap to select · tap again to deselect:
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" data-testid="explorer-suggestions">
               {prompt.suggestions.map((_, idx) => {
                 const isSelected = state.selectedIndices.has(idx);
                 const displayText = getDisplayText(idx);
@@ -379,6 +379,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
               size="sm"
               onClick={handleNext}
               className="text-xs"
+              data-testid="explorer-next"
             >
               Next
               <ArrowRight className="h-3 w-3" />
@@ -390,6 +391,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
               size="sm"
               onClick={handleFinish}
               className="text-xs"
+              data-testid="explorer-complete"
             >
               Complete ✨
             </Button>

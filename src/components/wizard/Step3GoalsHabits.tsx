@@ -290,6 +290,7 @@ export function Step3GoalsHabits({ state, update, next }: Step3Props) {
                       onChange={(e) => updateGoal(area, { objective: e.target.value })}
                       placeholder="Or write your own goal…"
                       className="text-sm mt-0.5"
+                      data-testid={`goal-${area}-objective`}
                     />
                   </div>
 
@@ -308,6 +309,7 @@ export function Step3GoalsHabits({ state, update, next }: Step3Props) {
                       onChange={(e) => updateGoal(area, { habit: e.target.value })}
                       placeholder="Or write your own habit…"
                       className="text-sm mt-0.5"
+                      data-testid={`goal-${area}-habit`}
                     />
                   </div>
 
@@ -348,6 +350,7 @@ export function Step3GoalsHabits({ state, update, next }: Step3Props) {
         size="lg"
         className="w-full text-base mt-2"
         onClick={handleGenerate}
+        data-testid="generate-board"
       >
         Generate My Board →
       </Button>
