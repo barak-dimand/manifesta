@@ -64,30 +64,41 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const uploadFile = async (file: File): Promise<string | null> => {
-    const fd = new FormData();
-    fd.append('file', file);
-    try {
-      const res = await fetch('/api/upload/photo', { method: 'POST', body: fd });
-      if (!res.ok) return null;
-      const data = await res.json() as { url?: string };
-      return data.url ?? null;
-    } catch {
-      return null;
-    }
-  };
-
   const uploadFiles = async (files: File[]) => {
     const remaining = MAX_PHOTOS - state.photos.length;
     const toUpload = files.slice(0, remaining);
     if (toUpload.length === 0) return;
     setUploading(true);
     setUploadError(null);
-    const results = await Promise.all(toUpload.map(uploadFile));
+
+    let storageUnavailable = false;
+    const results = await Promise.all(
+      toUpload.map(async (file) => {
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+          const res = await fetch('/api/upload/photo', { method: 'POST', body: fd });
+          if (res.status === 503) { storageUnavailable = true; return null; }
+          if (!res.ok) return null;
+          const data = await res.json() as { url?: string };
+          return data.url ?? null;
+        } catch {
+          return null;
+        }
+      }),
+    );
+
     const uploaded = results.filter((u): u is string => u !== null);
     if (uploaded.length > 0) update({ photos: [...state.photos, ...uploaded] });
-    if (uploaded.length < toUpload.length) {
-      setUploadError(`${toUpload.length - uploaded.length} photo(s) failed to upload — please try again.`);
+
+    if (storageUnavailable) {
+      setUploadError('Photo storage is not configured — you can continue without a photo.');
+    } else if (uploaded.length < toUpload.length) {
+      setUploadError(
+        uploaded.length === 0
+          ? 'Photos failed to upload — please try again.'
+          : `${toUpload.length - uploaded.length} photo(s) failed to upload — please try again.`,
+      );
     }
     setUploading(false);
   };

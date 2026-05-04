@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { useWizard } from '@/hooks/use-wizard';
@@ -13,6 +13,8 @@ import { Step2PhotosStyle } from '@/components/wizard/Step2PhotosStyle';
 import { Step3GoalsHabits } from '@/components/wizard/Step3GoalsHabits';
 import { Step4Output } from '@/components/wizard/Step4Output';
 import { cn } from '@/lib/utils';
+import type { AestheticStyle, Goal } from '@/lib/validations/wizard';
+import type { SerializablePromptState } from '@/hooks/use-wizard';
 
 const STEPS = [
   { label: 'Dream Life', index: 0 },
@@ -24,36 +26,112 @@ const STEPS = [
 export function WizardContainer() {
   const { state, next, prev, goToStep, update, reset } = useWizard();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [dir, setDir] = useState(1);
   const { isSignedIn } = useUser();
   const autoSaveRef = useRef(false);
+  const editBoardIdRef = useRef<string | null>(null);
+  const initDoneRef = useRef(false);
 
+  // Handle ?new=1 (reset) and ?boardId=xxx (edit) on mount
   useEffect(() => {
-    if (!isSignedIn || state.step !== 3 || !state.manifesto || state.boardId) return;
+    if (initDoneRef.current) return;
+    initDoneRef.current = true;
+
+    const isNew = searchParams.get('new') === '1';
+    const editId = searchParams.get('boardId');
+
+    if (isNew || editId) {
+      router.replace('/create');
+    }
+
+    if (isNew) {
+      reset();
+      return;
+    }
+
+    if (editId) {
+      editBoardIdRef.current = editId;
+      fetch(`/api/boards/${editId}`)
+        .then((r) => r.json() as Promise<{ board?: {
+          id: string;
+          selectedAreas: string[];
+          dreams: string;
+          style: string;
+          goals: Goal[];
+          manifesto: string | null;
+          enableTimeline: boolean | null;
+          photoUrls: string[] | null;
+          explorerData: unknown;
+        } }>)
+        .then(({ board }) => {
+          if (!board) return;
+          reset();
+          update({
+            step: 0,
+            maxStep: 3,
+            selectedAreas: board.selectedAreas as Parameters<typeof update>[0]['selectedAreas'],
+            dreams: board.dreams,
+            explorerPromptStates: (board.explorerData as SerializablePromptState[] | null) ?? null,
+            photos: board.photoUrls ?? [],
+            style: board.style as AestheticStyle,
+            goals: board.goals,
+            enableTimeline: board.enableTimeline ?? false,
+            manifesto: board.manifesto ?? '',
+            boardId: board.id,
+          });
+          autoSaveRef.current = false;
+        })
+        .catch(console.error);
+      return;
+    }
+
+    // If the previous session was fully completed (boardId set) and we're
+    // back at the wizard without an explicit edit param, start fresh so the
+    // user isn't dropped into Step 4 unexpectedly.
+    if (state.boardId && state.step === 3) {
+      reset();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-save: POST for new boards, PUT for edits
+  useEffect(() => {
+    if (!isSignedIn || state.step !== 3 || !state.manifesto) return;
+
+    const isEdit = !!editBoardIdRef.current;
+    // For new boards, don't re-save once boardId is set
+    if (!isEdit && state.boardId) return;
     if (autoSaveRef.current) return;
     autoSaveRef.current = true;
 
-    const goals = state.goals.filter((g) => g.objective.trim() && g.habit.trim());
-    fetch('/api/boards', {
-      method: 'POST',
+    // Save all raw inputs — keep goals even if incomplete so no data is lost
+    const goals = state.goals.filter((g) => g.objective.trim() || g.habit.trim());
+    const body = {
+      selectedAreas: state.selectedAreas,
+      dreams: state.dreams,
+      style: state.style,
+      goals,
+      manifesto: state.manifesto,
+      enableTimeline: state.enableTimeline,
+      photoUrls: state.photos.filter((p) => p.startsWith('http')),
+      explorerData: state.explorerPromptStates,
+    };
+
+    const url = isEdit ? `/api/boards/${editBoardIdRef.current}` : '/api/boards';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        selectedAreas: state.selectedAreas,
-        dreams: state.dreams,
-        style: state.style,
-        goals,
-        manifesto: state.manifesto,
-        enableTimeline: state.enableTimeline,
-        photoUrls: state.photos.filter((p) => p.startsWith('http')),
-        explorerData: state.explorerPromptStates,
-      }),
+      body: JSON.stringify(body),
     })
       .then((r) => r.json() as Promise<{ board?: { id: string } }>)
       .then((data) => {
         if (data.board?.id) update({ boardId: data.board.id });
       })
       .catch(console.error);
-  }, [isSignedIn, state.step, state.manifesto, state.boardId, state.selectedAreas, state.dreams, state.style, state.goals, state.enableTimeline, update]);
+  }, [isSignedIn, state.step, state.manifesto, state.boardId, state.selectedAreas, state.dreams, state.style, state.goals, state.enableTimeline, state.photos, state.explorerPromptStates, update]);
 
   const slideVariants = {
     enter: (d: number) => ({ x: d * 60, opacity: 0 }),
@@ -88,6 +166,12 @@ export function WizardContainer() {
     goToStep(target);
   };
 
+  const handleReset = () => {
+    editBoardIdRef.current = null;
+    autoSaveRef.current = false;
+    reset();
+  };
+
   const renderStep = () => {
     const props = { state, update, next: handleNext, prev: handlePrev };
     switch (state.step) {
@@ -98,7 +182,7 @@ export function WizardContainer() {
       case 2:
         return <Step3GoalsHabits key="step-3" {...props} />;
       case 3:
-        return <Step4Output key="step-4" {...props} onReset={reset} />;
+        return <Step4Output key="step-4" {...props} onReset={handleReset} />;
       default:
         return null;
     }

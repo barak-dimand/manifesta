@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { WizardContainer } from '@/components/wizard/WizardContainer';
 import type { Metadata } from 'next';
 
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function CreatePage() {
-  return <WizardContainer />;
+  return (
+    <Suspense>
+      <WizardContainer />
+    </Suspense>
+  );
 }

@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Download } from 'lucide-react';
+import { Download, Pencil } from 'lucide-react';
 import { getDb } from '@/lib/db';
 import { boards, generatedWallpapers } from '@/lib/db/schema';
 import { eq, desc, gte, and, count } from 'drizzle-orm';
@@ -54,7 +54,7 @@ export default async function DashboardPage() {
           <Link href="/" className="font-display text-base font-semibold text-forest tracking-wide hover:text-sage transition-colors">
             Manifesta
           </Link>
-          <Link href="/create" className="font-sans text-sm font-semibold text-sage hover:text-forest transition-colors">
+          <Link href="/create?new=1" className="font-sans text-sm font-semibold text-sage hover:text-forest transition-colors">
             + New Board
           </Link>
         </div>
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                 Complete the wizard and generate your first AI vision board wallpaper
               </p>
               <Link
-                href="/create"
+                href="/create?new=1"
                 className="inline-flex items-center gap-2 bg-gold text-forest font-sans text-sm font-semibold px-6 py-3 rounded-xl hover:bg-gold/90 transition-colors"
               >
                 Create My Dream Board
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
                 Complete the wizard to create your first dream board
               </p>
               <Link
-                href="/create"
+                href="/create?new=1"
                 className="inline-flex items-center gap-2 bg-gold text-forest font-sans text-sm font-semibold px-6 py-3 rounded-xl hover:bg-gold/90 transition-colors"
               >
                 Create My Dream Board
@@ -228,7 +228,7 @@ function WallpaperCard({ image }: { image: GeneratedWallpaper }) {
   );
 }
 
-// ── Board card (unchanged) ─────────────────────────────────────────────────
+// ── Board card ─────────────────────────────────────────────────────────────
 
 function BoardCard({ board }: { board: Board }) {
   const date = board.createdAt
@@ -258,7 +258,16 @@ function BoardCard({ board }: { board: Board }) {
         )}
         <div className="mt-auto flex items-center justify-between pt-2 border-t border-sage/10">
           {date && <span className="font-sans text-xs text-forest/40">{date}</span>}
-          <span className="font-sans text-xs text-forest/40 capitalize ml-auto">{board.style}</span>
+          <div className="flex items-center gap-3 ml-auto">
+            <span className="font-sans text-xs text-forest/40 capitalize">{board.style}</span>
+            <Link
+              href={`/create?boardId=${board.id}`}
+              className="flex items-center gap-1 font-sans text-xs font-medium text-sage hover:text-forest transition-colors"
+            >
+              <Pencil className="w-3 h-3" />
+              Edit
+            </Link>
+          </div>
         </div>
       </div>
     </div>
