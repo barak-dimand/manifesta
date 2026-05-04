@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { DreamExplorer } from './DreamExplorer';
-import type { WizardState } from '@/hooks/use-wizard';
+import type { WizardState, SerializablePromptState } from '@/hooks/use-wizard';
 import type { LifeArea } from '@/lib/validations/wizard';
 import { cn } from '@/lib/utils';
 
@@ -41,7 +41,8 @@ const MIN_DREAMS = 10;
 
 export function Step1DreamLife({ state, update, next }: Step1Props) {
   const [dreamsError, setDreamsError] = useState('');
-  const [explorerOpen, setExplorerOpen] = useState(false);
+  // Show textarea (not explorer) if the user has already completed the explorer
+  const [explorerOpen, setExplorerOpen] = useState(() => state.dreams.length === 0);
 
   const toggleArea = (area: LifeArea) => {
     const current = state.selectedAreas;
@@ -65,6 +66,10 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
   const handleExplorerComplete = (combinedDream: string) => {
     update({ dreams: combinedDream });
     setExplorerOpen(false);
+  };
+
+  const handleExplorerStateChange = (states: SerializablePromptState[]) => {
+    update({ explorerPromptStates: states });
   };
 
   const isValid = state.selectedAreas.length > 0 && state.dreams.length >= MIN_DREAMS;
@@ -138,7 +143,7 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
               className="flex items-center gap-1.5 text-xs text-sage hover:text-sage/80 font-sans font-medium transition-colors"
             >
               <Wand2 className="h-3 w-3" />
-              Not sure what to write?
+              Edit answers
             </button>
           )}
         </div>
@@ -154,7 +159,8 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
             >
               <DreamExplorer
                 onComplete={handleExplorerComplete}
-                onCancel={() => setExplorerOpen(false)}
+                initialPromptStates={state.explorerPromptStates}
+                onStateChange={handleExplorerStateChange}
               />
             </motion.div>
           ) : (

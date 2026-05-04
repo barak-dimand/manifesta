@@ -5,6 +5,9 @@ import { emailSubscriptions, boards } from '@/lib/db/schema';
 import { sendWelcomeEmail } from '@/lib/email/send';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { logger, serializeError } from '@/lib/logger';
+
+const ROUTE = '/api/email/subscribe';
 
 const SubscribeSchema = z.object({
   boardId: z.string().uuid(),
@@ -15,21 +18,23 @@ const SubscribeSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
-
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body: unknown = await request.json();
     const parsed = SubscribeSchema.safeParse(body);
-
     if (!parsed.success) {
+      await logger.warn('Email subscribe: validation failed', {
+        route: ROUTE,
+        userId,
+        details: { errors: parsed.error.flatten() },
+      });
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
     const { boardId, sendHour, timezone } = parsed.data;
 
-    // Verify the board belongs to this user
     const [board] = await getDb()
       .select()
       .from(boards)
@@ -37,43 +42,50 @@ export async function POST(request: NextRequest) {
       .limit(1);
 
     if (!board || board.userId !== userId) {
+      await logger.warn('Email subscribe: board not found or unauthorized', {
+        route: ROUTE,
+        userId,
+        details: { boardId },
+      });
       return NextResponse.json({ error: 'Board not found' }, { status: 404 });
     }
 
-    // Get the Clerk user email
     const clerkUser = await currentUser();
-    const email =
-      clerkUser?.emailAddresses?.[0]?.emailAddress ?? board.email;
+    const email = clerkUser?.emailAddresses?.[0]?.emailAddress ?? board.email;
 
-    // Upsert email subscription for this user
     await getDb()
       .insert(emailSubscriptions)
-      .values({
-        userId,
-        email,
-        boardId,
-        isActive: true,
-        sendHour,
-        timezone,
-      })
+      .values({ userId, email, boardId, isActive: true, sendHour, timezone })
       .onConflictDoUpdate({
         target: emailSubscriptions.userId,
-        set: {
-          boardId,
-          isActive: true,
-          sendHour,
-          timezone,
-        },
+        set: { boardId, isActive: true, sendHour, timezone },
       });
 
-    // Send welcome email with manifesto
+    await logger.info('Email subscription saved', {
+      route: ROUTE,
+      userId,
+      details: { boardId, sendHour, timezone },
+    });
+
     if (board.manifesto) {
-      await sendWelcomeEmail(email, board.manifesto);
+      try {
+        await sendWelcomeEmail(email, board.manifesto);
+        await logger.info('Welcome email sent', { route: ROUTE, userId, details: { email } });
+      } catch (emailErr) {
+        await logger.warn('Welcome email failed (subscription still saved)', {
+          route: ROUTE,
+          userId,
+          details: { ...serializeError(emailErr), email },
+        });
+      }
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('email subscribe POST error:', err);
+    await logger.error('Email subscribe failed', {
+      route: ROUTE,
+      details: serializeError(err),
+    });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

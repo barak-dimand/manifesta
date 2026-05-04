@@ -11,7 +11,11 @@
       "Bash(npx tsc *)",
       "Bash(cat)",
       "Bash(git -C /Users/barakdimand/Desktop/TechStuff/manifesta add .husky/commit-msg)",
-      "Bash(git -C /Users/barakdimand/Desktop/TechStuff/manifesta commit -m 'chore: fix husky v10 commit-msg hook format *)"
+      "Bash(git -C /Users/barakdimand/Desktop/TechStuff/manifesta commit -m 'chore: fix husky v10 commit-msg hook format *)",
+      "Bash(nvm use *)",
+      "Bash(pnpm lint *)",
+      "Bash(grep -E \"\\\\.\\(json|ts|js|md\\)$\")",
+      "Bash(pnpm build *)"
     ]
   }
 }

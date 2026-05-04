@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Wand2, ArrowRight, Lightbulb, Plus, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { SerializablePromptState } from '@/hooks/use-wizard';
 
 const EXPLORATION_PROMPTS = [
   {
@@ -92,17 +93,22 @@ type PromptState = {
 
 interface DreamExplorerProps {
   onComplete: (combinedDream: string) => void;
-  onCancel: () => void;
+  initialPromptStates?: SerializablePromptState[] | null;
+  onStateChange?: (states: SerializablePromptState[]) => void;
 }
 
-export function DreamExplorer({ onComplete, onCancel }: DreamExplorerProps) {
+export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }: DreamExplorerProps) {
   const [currentPrompt, setCurrentPrompt] = useState(0);
-  const [promptStates, setPromptStates] = useState<PromptState[]>(
-    EXPLORATION_PROMPTS.map(() => ({
-      selectedIndices: new Set<number>(),
-      edits: {},
-      customText: '',
-    }))
+  const [promptStates, setPromptStates] = useState<PromptState[]>(() =>
+    EXPLORATION_PROMPTS.map((_, i) => {
+      const saved = initialPromptStates?.[i];
+      if (!saved) return { selectedIndices: new Set<number>(), edits: {}, customText: '' };
+      return {
+        selectedIndices: new Set(saved.selectedIndices),
+        edits: saved.edits,
+        customText: saved.customText,
+      };
+    })
   );
   // Track editing as [promptIndex, suggestionIndex] so it auto-clears on prompt change
   const [editing, setEditing] = useState<[number, number] | null>(null);
@@ -113,6 +119,19 @@ export function DreamExplorer({ onComplete, onCancel }: DreamExplorerProps) {
       editInputRef.current.focus();
     }
   }, [editing]);
+
+  // Sync selections back to wizard state so they survive navigation
+  const onStateChangeRef = useRef(onStateChange);
+  useEffect(() => { onStateChangeRef.current = onStateChange; });
+  useEffect(() => {
+    onStateChangeRef.current?.(
+      promptStates.map((s) => ({
+        selectedIndices: Array.from(s.selectedIndices),
+        edits: s.edits,
+        customText: s.customText,
+      })),
+    );
+  }, [promptStates]);
 
   const editingIndex = editing?.[0] === currentPrompt ? editing[1] : null;
 
@@ -190,17 +209,9 @@ export function DreamExplorer({ onComplete, onCancel }: DreamExplorerProps) {
   return (
     <div className="space-y-5 rounded-2xl border-2 border-sage/20 bg-sage-light/30 p-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sage">
-          <Wand2 className="h-4 w-4" />
-          <span className="font-sans text-sm font-semibold">Dream Explorer</span>
-        </div>
-        <button
-          onClick={onCancel}
-          className="font-sans text-xs text-forest/50 hover:text-forest transition-colors"
-        >
-          I&apos;ll write my own
-        </button>
+      <div className="flex items-center gap-2 text-sage">
+        <Wand2 className="h-4 w-4" />
+        <span className="font-sans text-sm font-semibold">Dream Explorer</span>
       </div>
 
       {/* Progress dots */}
@@ -248,7 +259,7 @@ export function DreamExplorer({ onComplete, onCancel }: DreamExplorerProps) {
           {/* Suggestion chips */}
           <div className="space-y-2">
             <p className="font-sans text-xs text-forest/50 font-medium">
-              Tap to select · tap again to edit:
+              Tap to select · tap again to deselect:
             </p>
             <div className="flex flex-wrap gap-2">
               {prompt.suggestions.map((_, idx) => {
@@ -275,6 +286,7 @@ export function DreamExplorer({ onComplete, onCancel }: DreamExplorerProps) {
                         className="bg-transparent outline-none px-3.5 py-2 font-sans text-xs text-white placeholder:text-white/50 min-w-[200px]"
                       />
                       <button
+                        type="button"
                         onClick={() => toggleSuggestion(idx)}
                         className="px-2 py-2 text-white/60 hover:text-white transition-colors"
                         title="Remove"
@@ -285,30 +297,40 @@ export function DreamExplorer({ onComplete, onCancel }: DreamExplorerProps) {
                   );
                 }
 
+                // Use div+role so we can nest the pencil button without invalid HTML
                 return (
-                  <motion.button
+                  <motion.div
                     key={idx}
+                    role="button"
+                    tabIndex={0}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      if (!isSelected) {
-                        toggleSuggestion(idx);
-                      } else {
-                        setEditing([currentPrompt, idx]);
-                      }
-                    }}
+                    onClick={() => toggleSuggestion(idx)}
+                    onKeyDown={(e) => e.key === 'Enter' && toggleSuggestion(idx)}
                     className={cn(
-                      'rounded-full px-3.5 py-2 font-sans text-xs transition-all duration-200 border flex items-center gap-1.5',
+                      'rounded-full px-3.5 py-2 font-sans text-xs transition-all duration-200 border flex items-center gap-1.5 cursor-pointer select-none',
                       isSelected
                         ? 'bg-sage text-white border-sage shadow-sm'
                         : 'bg-cream text-forest border-sage/20 hover:border-sage/50 hover:bg-sage-light/60'
                     )}
                   >
-                    {isSelected && <Pencil className="h-2.5 w-2.5 flex-shrink-0" />}
                     <span>{displayText}</span>
                     {isEdited && (
                       <span className="text-[9px] opacity-60">(edited)</span>
                     )}
-                  </motion.button>
+                    {isSelected && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditing([currentPrompt, idx]);
+                        }}
+                        className="opacity-60 hover:opacity-100 transition-opacity ml-0.5"
+                        title="Edit text"
+                      >
+                        <Pencil className="h-2.5 w-2.5" />
+                      </button>
+                    )}
+                  </motion.div>
                 );
               })}
             </div>

@@ -25,51 +25,91 @@ interface Step3Props {
   prev: () => void;
 }
 
-const AREA_META: Record<
-  LifeArea,
-  {
-    label: string;
-    Icon: React.ElementType;
-    objectivePlaceholder: string;
-    habitPlaceholder: string;
-  }
-> = {
-  career: {
-    label: 'Career & Purpose',
-    Icon: Briefcase,
-    objectivePlaceholder: 'Build a business generating $10k/month',
-    habitPlaceholder: 'Work on my business for 1 hour before 9am',
-  },
-  love: {
-    label: 'Love & Relationships',
-    Icon: Heart,
-    objectivePlaceholder: 'Build a deeply loving, committed partnership',
-    habitPlaceholder: 'Express gratitude to someone I love each morning',
-  },
-  health: {
-    label: 'Health & Vitality',
-    Icon: Zap,
-    objectivePlaceholder: 'Feel energetic, fit, and strong every day',
-    habitPlaceholder: 'Move my body for 30 minutes every morning',
-  },
-  travel: {
-    label: 'Travel & Adventure',
-    Icon: Globe,
-    objectivePlaceholder: 'Visit 3 new countries this year',
-    habitPlaceholder: 'Save $20/day toward my travel fund',
-  },
-  wealth: {
-    label: 'Wealth & Abundance',
-    Icon: TrendingUp,
-    objectivePlaceholder: 'Achieve financial freedom by 35',
-    habitPlaceholder: 'Track my net worth and review my finances weekly',
-  },
-  creativity: {
-    label: 'Creativity & Joy',
-    Icon: Palette,
-    objectivePlaceholder: 'Complete and share a creative project I am proud of',
-    habitPlaceholder: 'Create something every day for 20 minutes',
-  },
+const AREA_META: Record<LifeArea, { label: string; Icon: React.ElementType }> = {
+  career: { label: 'Career & Purpose', Icon: Briefcase },
+  love: { label: 'Love & Relationships', Icon: Heart },
+  health: { label: 'Health & Vitality', Icon: Zap },
+  travel: { label: 'Travel & Adventure', Icon: Globe },
+  wealth: { label: 'Wealth & Abundance', Icon: TrendingUp },
+  creativity: { label: 'Creativity & Joy', Icon: Palette },
+};
+
+const GOAL_SUGGESTIONS: Record<LifeArea, string[]> = {
+  career: [
+    'Launch a business generating $10k/month',
+    'Leave my 9-5 and work entirely for myself',
+    'Get promoted to a senior leadership role',
+    'Build a $3k/month passive income stream',
+  ],
+  love: [
+    'Build a deeply loving, committed relationship',
+    'Strengthen my closest friendships with real quality time',
+    'Heal past patterns and show up fully in relationships',
+    'Build a warm, supportive community around me',
+  ],
+  health: [
+    'Get lean, strong, and feel energetic every single day',
+    'Complete a marathon or major fitness challenge',
+    'Build a consistent sleep routine and wake refreshed',
+    'Heal my relationship with food and feel at peace',
+  ],
+  travel: [
+    'Visit 3 new countries this year',
+    'Take a solo trip abroad that changes my perspective',
+    'Live as a digital nomad for at least 3 months',
+    'Reach my bucket-list destination before year-end',
+  ],
+  wealth: [
+    'Build a 6-month emergency fund',
+    'Invest consistently and grow my net worth by 30%',
+    'Pay off all high-interest debt completely',
+    'Reach a level where my money works for me',
+  ],
+  creativity: [
+    'Complete and publicly share a project I am proud of',
+    'Launch a creative side project or brand',
+    'Master a new creative skill and reach an advanced level',
+    'Create something that genuinely moves people',
+  ],
+};
+
+const HABIT_SUGGESTIONS: Record<LifeArea, string[]> = {
+  career: [
+    'Work on my business for 1 focused hour before 9am',
+    'Review my top 3 priorities every single morning',
+    'Reach out to one new connection or mentor each week',
+    'Block 2 hours of uninterrupted deep work daily',
+  ],
+  love: [
+    'Express gratitude or appreciation to someone I love daily',
+    'Put my phone away fully during meals and quality time',
+    'Journal about my feelings and relationships for 10 min',
+    'Plan one intentional date or connection session weekly',
+  ],
+  health: [
+    'Move my body for 30 minutes every morning',
+    'Drink 2L of water and eat a nourishing breakfast daily',
+    'Be in bed by 10:30pm — no screens, no exceptions',
+    'Meditate or breathe deeply for 10 minutes each morning',
+  ],
+  travel: [
+    'Save $20 every day into a dedicated travel fund',
+    'Research and plan one upcoming trip each Sunday',
+    'Learn 5 phrases in a language I want to speak weekly',
+    'Read one travel book or destination guide monthly',
+  ],
+  wealth: [
+    'Track every expense and review finances every Sunday',
+    'Auto-invest a fixed amount on every payday',
+    'Read 15 minutes of finance or investing content daily',
+    'Find and cancel one unnecessary subscription monthly',
+  ],
+  creativity: [
+    'Create something — write, draw, or build — for 20 min daily',
+    'Share one piece of my work publicly every week',
+    'Spend 30 min with inspiring books, art, or film daily',
+    'Attend one creative class or workshop per month',
+  ],
 };
 
 const TIMELINE_OPTIONS: { value: Timeline; label: string }[] = [
@@ -95,6 +135,36 @@ function buildManifesto(state: WizardState): string {
   const dreamsSnippet = state.dreams.trim().slice(0, 200);
 
   return `My dream life is one where ${dreamsSnippet}. I am building a life of ${areaNames}. ${goalsText} This is my life. This is my time.`;
+}
+
+function SuggestionChips({
+  suggestions,
+  currentValue,
+  onSelect,
+}: {
+  suggestions: string[];
+  currentValue: string;
+  onSelect: (s: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {suggestions.map((s) => (
+        <button
+          key={s}
+          type="button"
+          onClick={() => onSelect(s)}
+          className={cn(
+            'text-xs px-2.5 py-1 rounded-full border transition-all duration-150 font-sans text-left leading-snug',
+            currentValue === s
+              ? 'bg-sage text-white border-sage shadow-sm'
+              : 'bg-cream text-forest/70 border-sage/20 hover:border-sage/50 hover:bg-sage-light/60',
+          )}
+        >
+          {s}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 export function Step3GoalsHabits({ state, update, next }: Step3Props) {
@@ -143,7 +213,7 @@ export function Step3GoalsHabits({ state, update, next }: Step3Props) {
           Turn your dreams into daily action
         </h1>
         <p className="font-sans text-forest/60 text-base">
-          One goal + one daily habit per area you selected.
+          One goal + one daily habit per area. Pick a suggestion or write your own.
         </p>
       </div>
 
@@ -166,9 +236,7 @@ export function Step3GoalsHabits({ state, update, next }: Step3Props) {
             )}
           />
         </button>
-        <span className="font-sans text-sm font-medium text-forest/70">
-          Add target dates?
-        </span>
+        <span className="font-sans text-sm font-medium text-forest/70">Add target dates?</span>
       </div>
 
       {/* Goal cards per area */}
@@ -206,30 +274,40 @@ export function Step3GoalsHabits({ state, update, next }: Step3Props) {
 
               {/* Area content */}
               {isOpen && (
-                <div className="px-5 pb-5 flex flex-col gap-4 border-t border-sage/10 pt-4">
+                <div className="px-5 pb-5 flex flex-col gap-5 border-t border-sage/10 pt-4">
                   {/* Objective */}
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-2">
                     <Label className="text-xs font-semibold text-forest/60 uppercase tracking-wider">
                       My goal for {meta.label}
                     </Label>
+                    <SuggestionChips
+                      suggestions={GOAL_SUGGESTIONS[area]}
+                      currentValue={goal.objective}
+                      onSelect={(s) => updateGoal(area, { objective: s })}
+                    />
                     <Input
                       value={goal.objective}
                       onChange={(e) => updateGoal(area, { objective: e.target.value })}
-                      placeholder={meta.objectivePlaceholder}
-                      className="text-sm"
+                      placeholder="Or write your own goal…"
+                      className="text-sm mt-0.5"
                     />
                   </div>
 
                   {/* Daily habit */}
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-2">
                     <Label className="text-xs font-semibold text-forest/60 uppercase tracking-wider">
                       My daily habit
                     </Label>
+                    <SuggestionChips
+                      suggestions={HABIT_SUGGESTIONS[area]}
+                      currentValue={goal.habit}
+                      onSelect={(s) => updateGoal(area, { habit: s })}
+                    />
                     <Input
                       value={goal.habit}
                       onChange={(e) => updateGoal(area, { habit: e.target.value })}
-                      placeholder={meta.habitPlaceholder}
-                      className="text-sm"
+                      placeholder="Or write your own habit…"
+                      className="text-sm mt-0.5"
                     />
                   </div>
 

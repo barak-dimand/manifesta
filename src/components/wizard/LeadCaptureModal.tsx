@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -30,7 +29,6 @@ export function LeadCaptureModal({
   onLeadCaptured,
   wizardData,
 }: LeadCaptureModalProps) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
 
@@ -57,7 +55,11 @@ export function LeadCaptureModal({
             selectedAreas: wizardData.selectedAreas,
             dreams: wizardData.dreams,
             style: wizardData.style,
+            goals: wizardData.goals,
             manifesto: wizardData.manifesto,
+            enableTimeline: wizardData.enableTimeline,
+            photoCount: wizardData.photos.length,
+            photoUrls: wizardData.photos.filter((p) => p.startsWith('http')),
           },
         }),
       });
@@ -69,7 +71,6 @@ export function LeadCaptureModal({
 
       reset();
       onLeadCaptured();
-      router.push('/sign-up');
     } catch (err) {
       setServerError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {

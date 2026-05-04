@@ -1,23 +1,27 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/create(.*)',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/leads(.*)',
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/admin(.*)',
+  '/api/boards(.*)',
+  '/api/user(.*)',
+  '/api/email(.*)',
   '/api/wallpaper(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
+  if (isProtectedRoute(request)) {
     await auth.protect();
   }
 });
 
+// Only run Clerk on routes that actually need auth.
+// Excluding public pages (/, /create, /sign-in, /sign-up) prevents the
+// cross-domain handshake redirect that Clerk dev instances do on non-localhost.
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/dashboard/:path*',
+    '/admin/:path*',
     '/(api|trpc)(.*)',
   ],
 };
