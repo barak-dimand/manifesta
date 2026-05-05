@@ -177,7 +177,7 @@ export async function sendAdminNewSignup({
 
   return getResend().emails.send({
     from: FROM(),
-    to: 'barakdimand6@gmail.com',
+    to: 'bdimandailife@gmail.com',
     subject: `${hasPaid ? '💰 Paid interest — ' : ''}New Manifesta signup: ${name}`,
     html: `
       <!DOCTYPE html>
