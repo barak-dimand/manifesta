@@ -6,6 +6,7 @@ import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 import { LifeArea, AestheticStyle, GoalSchema } from '@/lib/validations/wizard';
 import { logger, serializeError } from '@/lib/logger';
+import { sendBoardConfirmation, sendAdminNewSignup } from '@/lib/email/send';
 
 const ROUTE = '/api/boards';
 
@@ -73,6 +74,36 @@ export async function POST(request: NextRequest) {
       route: ROUTE,
       userId,
       details: { boardId: board.id, style, areas: selectedAreas },
+    });
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://manifesta.app';
+    const firstName = user?.firstName ?? null;
+
+    // Fire both emails in parallel, non-blocking — never fail the request if email fails
+    void Promise.allSettled([
+      sendBoardConfirmation({
+        to: email,
+        firstName,
+        dreams,
+        selectedOffers: board.selectedOffers ?? ['wallpaper'],
+        dashboardUrl: `${appUrl}/dashboard`,
+      }),
+      sendAdminNewSignup({
+        userEmail: email,
+        firstName,
+        lastName: user?.lastName ?? null,
+        dreams,
+        selectedAreas,
+        selectedOffers: board.selectedOffers ?? ['wallpaper'],
+        boardId: board.id,
+        appUrl,
+      }),
+    ]).then((results) => {
+      for (const r of results) {
+        if (r.status === 'rejected') {
+          void logger.warn('Email send failed after board save', { route: ROUTE, details: serializeError(r.reason) });
+        }
+      }
     });
 
     return NextResponse.json({ board }, { status: 201 });
