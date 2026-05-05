@@ -131,6 +131,8 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
         photoUrls: state.photos.filter((p) => p.startsWith('http')),
         explorerData: state.explorerPromptStates,
         selectedOffers: state.selectedOffers?.length ? state.selectedOffers : ['wallpaper'],
+        selectedQuotes: state.selectedQuotes,
+        customQuotes: state.customQuotes,
       };
 
       const res = await fetch('/api/boards', {

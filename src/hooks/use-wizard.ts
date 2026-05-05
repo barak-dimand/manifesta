@@ -21,6 +21,8 @@ export interface WizardState {
   manifesto: string;
   boardId: string | null; // set after successful post-auth board save
   selectedOffers: string[]; // which offer tiers the user selected
+  selectedQuotes: string[]; // curated quotes chosen in step 3
+  customQuotes: string[]; // user-written quotes / affirmations
 }
 
 const initialState: WizardState = {
@@ -36,6 +38,8 @@ const initialState: WizardState = {
   manifesto: '',
   boardId: null,
   selectedOffers: ['wallpaper'],
+  selectedQuotes: [],
+  customQuotes: [],
 };
 
 const STORAGE_KEY = 'manifesta-wizard';

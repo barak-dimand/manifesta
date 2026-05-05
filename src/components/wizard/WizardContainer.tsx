@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useWizard } from '@/hooks/use-wizard';
 import { Step1DreamLife } from '@/components/wizard/Step1DreamLife';
 import { Step2PhotosStyle } from '@/components/wizard/Step2PhotosStyle';
-import { Step3GoalsHabits } from '@/components/wizard/Step3GoalsHabits';
+import { Step3Quotes } from '@/components/wizard/Step3Quotes';
 import { Step4Output } from '@/components/wizard/Step4Output';
 import { cn } from '@/lib/utils';
 import type { AestheticStyle, Goal } from '@/lib/validations/wizard';
@@ -19,7 +19,7 @@ import type { SerializablePromptState } from '@/hooks/use-wizard';
 const STEPS = [
   { label: 'Dream Life', index: 0 },
   { label: 'Photos & Style', index: 1 },
-  { label: 'Goals', index: 2 },
+  { label: 'Quotes', index: 2 },
   { label: 'Your Journey', index: 3 },
 ];
 
@@ -114,6 +114,8 @@ export function WizardContainer() {
       photoUrls: state.photos.filter((p) => p.startsWith('http')),
       explorerData: state.explorerPromptStates,
       selectedOffers: state.selectedOffers,
+      selectedQuotes: state.selectedQuotes,
+      customQuotes: state.customQuotes,
     };
 
     fetch(`/api/boards/${editBoardIdRef.current}`, {
@@ -175,7 +177,7 @@ export function WizardContainer() {
       case 1:
         return <Step2PhotosStyle key="step-2" {...props} />;
       case 2:
-        return <Step3GoalsHabits key="step-3" {...props} />;
+        return <Step3Quotes key="step-3" {...props} />;
       case 3:
         return <Step4Output key="step-4" {...props} onReset={handleReset} />;
       default:

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sparkles, Menu, X } from 'lucide-react';
+import { Sparkles, Menu, X, LayoutDashboard } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -18,27 +19,28 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { isSignedIn, isLoaded, user } = useUser();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Derive menu visibility — never show on desktop even if state is stale
   const isMenuOpen = isMobile && mobileOpen;
 
   const handleNavClick = (href: string) => {
     setMobileOpen(false);
     if (href.startsWith('#')) {
       const el = document.querySelector(href);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Avatar initials from Clerk user
+  const initials = isLoaded && user
+    ? (`${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase() || (user.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() ?? '?'))
+    : null;
 
   return (
     <header
@@ -73,16 +75,37 @@ export function Navbar() {
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/sign-in"
-              className="text-sm font-sans text-forest/70 hover:text-forest transition-colors"
-            >
-              Sign in
-            </Link>
-            <Button variant="gold" size="sm" asChild>
-              <Link href="/create">Create Your Board</Link>
-            </Button>
+          <div className="hidden md:flex items-center gap-3">
+            {isLoaded && isSignedIn ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-1.5 text-sm font-sans text-forest/70 hover:text-forest transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </Link>
+                <Link href="/create">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-sage flex items-center justify-center text-white text-xs font-bold font-sans">
+                      {initials}
+                    </div>
+                  </div>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="text-sm font-sans text-forest/70 hover:text-forest transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Button variant="gold" size="sm" asChild>
+                  <Link href="/create">Create Your Board</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -117,18 +140,39 @@ export function Navbar() {
                   {link.label}
                 </button>
               ))}
-              <Link
-                href="/sign-in"
-                className="text-sm font-sans text-forest/70 hover:text-forest py-2"
-                onClick={() => setMobileOpen(false)}
-              >
-                Sign in
-              </Link>
-              <Button variant="gold" className="w-full mt-1" asChild>
-                <Link href="/create" onClick={() => setMobileOpen(false)}>
-                  Create Your Board
-                </Link>
-              </Button>
+
+              {isLoaded && isSignedIn ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-2 text-sm font-sans text-forest/70 hover:text-forest py-2 border-b border-sage/10"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    Dashboard
+                  </Link>
+                  <Button variant="gold" className="w-full mt-1" asChild>
+                    <Link href="/create" onClick={() => setMobileOpen(false)}>
+                      New Board
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    className="text-sm font-sans text-forest/70 hover:text-forest py-2"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                  <Button variant="gold" className="w-full mt-1" asChild>
+                    <Link href="/create" onClick={() => setMobileOpen(false)}>
+                      Create Your Board
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
         )}

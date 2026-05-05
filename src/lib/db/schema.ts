@@ -31,6 +31,8 @@ export const boards = pgTable('boards', {
   photoUrls: text('photo_urls').array(),
   explorerData: jsonb('explorer_data'),
   selectedOffers: text('selected_offers').array(),
+  selectedQuotes: text('selected_quotes').array(),
+  customQuotes: text('custom_quotes').array(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

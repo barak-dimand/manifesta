@@ -23,6 +23,8 @@ const PutBoardSchema = z.object({
   photoUrls: z.array(z.string()).optional(),
   explorerData: z.unknown().optional(),
   selectedOffers: z.array(z.string()).optional(),
+  selectedQuotes: z.array(z.string()).optional(),
+  customQuotes: z.array(z.string()).optional(),
 });
 
 export async function GET(
@@ -63,7 +65,7 @@ export async function PUT(
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { selectedAreas, dreams, style, goals, manifesto, enableTimeline, photoUrls, explorerData, selectedOffers } = parsed.data;
+    const { selectedAreas, dreams, style, goals, manifesto, enableTimeline, photoUrls, explorerData, selectedOffers, selectedQuotes, customQuotes } = parsed.data;
 
     const [board] = await getDb()
       .update(boards)
@@ -77,6 +79,8 @@ export async function PUT(
         photoUrls: photoUrls?.length ? photoUrls : null,
         explorerData: explorerData ?? null,
         selectedOffers: selectedOffers?.length ? selectedOffers : null,
+        selectedQuotes: selectedQuotes?.length ? selectedQuotes : null,
+        customQuotes: customQuotes?.length ? customQuotes : null,
         updatedAt: new Date(),
       })
       .where(and(eq(boards.id, id), eq(boards.userId, userId)))
