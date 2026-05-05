@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Upload, X, Check, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, X, Eye, ChevronLeft, ChevronRight, UserRound } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -57,6 +57,12 @@ const EXAMPLE_BOARDS = [
   { image: '/images/example-board-2.jpg', caption: 'Career Success & Abundance Board' },
 ];
 
+const GENDER_OPTIONS: { value: WizardState['gender']; label: string; emoji: string }[] = [
+  { value: 'female', label: 'Female', emoji: '👩' },
+  { value: 'male', label: 'Male', emoji: '👨' },
+  { value: 'prefer_not_to_say', label: 'Prefer not to say', emoji: '✨' },
+];
+
 export function Step2PhotosStyle({ state, update, next }: Step2Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -97,7 +103,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
       setUploadError(
         uploaded.length === 0
           ? 'Photos failed to upload — please try again.'
-          : `${toUpload.length - uploaded.length} photo(s) failed to upload — please try again.`,
+          : `${toUpload.length - uploaded.length} photo(s) failed to upload.`,
       );
     }
     setUploading(false);
@@ -120,25 +126,42 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
   };
 
   const canAddMore = state.photos.length < MAX_PHOTOS && !uploading;
+  const hasPhotos = state.photos.length > 0;
 
   return (
     <div className="flex flex-col gap-8">
       {/* Title */}
       <div>
         <h1 className="font-display text-3xl md:text-4xl font-semibold text-forest mb-2">
-          Set the mood for your board
+          Make it yours
         </h1>
         <p className="font-sans text-forest/60 text-base">
-          Add personal photos and choose the aesthetic that resonates with your vision.
+          Personalize your vision board with your own face and the aesthetic that resonates with your dream life.
         </p>
       </div>
 
       {/* Photo upload */}
       <div className="flex flex-col gap-3">
-        <Label className="text-sm font-semibold text-forest/80">
-          Add your photos{' '}
-          <span className="text-forest/40 font-normal">(optional, up to {MAX_PHOTOS})</span>
-        </Label>
+        {/* Section header with clear callout */}
+        <div className="flex items-start justify-between">
+          <Label className="text-sm font-semibold text-forest/80">
+            Your photos{' '}
+            <span className="text-forest/40 font-normal">(optional, up to {MAX_PHOTOS})</span>
+          </Label>
+        </div>
+
+        {/* Feature callout */}
+        <div className="rounded-xl bg-gold/10 border border-gold/25 px-4 py-3 flex items-start gap-3">
+          <span className="text-xl mt-0.5">🪞</span>
+          <div>
+            <p className="font-sans text-sm font-semibold text-forest">
+              See yourself in your dream life
+            </p>
+            <p className="font-sans text-xs text-forest/60 mt-0.5 leading-relaxed">
+              Upload photos of <strong>yourself</strong> and our AI will place you inside the vision board — living your dream life as if it&apos;s already real.
+            </p>
+          </div>
+        </div>
 
         <input
           ref={fileInputRef}
@@ -156,10 +179,10 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
             onDragOver={(e) => e.preventDefault()}
             onClick={() => !uploading && fileInputRef.current?.click()}
             className={cn(
-              'border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 transition-all duration-200',
+              'border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-3 transition-all duration-200',
               uploading
                 ? 'border-sage/40 bg-sage-light/10 cursor-default'
-                : 'border-sage/25 cursor-pointer hover:border-sage/50 hover:bg-sage-light/20',
+                : 'border-gold/30 cursor-pointer hover:border-gold/60 hover:bg-gold/5',
             )}
           >
             {uploading ? (
@@ -171,16 +194,17 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
               </>
             ) : (
               <>
-                <div className="w-10 h-10 rounded-full bg-sage-light flex items-center justify-center">
-                  <Upload className="w-5 h-5 text-sage" />
+                <div className="w-12 h-12 rounded-full bg-gold/15 flex items-center justify-center">
+                  <Upload className="w-5 h-5 text-gold" />
                 </div>
                 <div className="text-center">
-                  <p className="font-sans text-sm font-medium text-forest/70">
-                    Drop photos here or{' '}
-                    <span className="text-sage underline underline-offset-2">click to upload</span>
+                  <p className="font-sans text-sm font-semibold text-forest/80">
+                    Upload photos of yourself
                   </p>
-                  <p className="font-sans text-xs text-forest/40 mt-1">
-                    {state.photos.length}/{MAX_PHOTOS} photos added
+                  <p className="font-sans text-xs text-forest/50 mt-1">
+                    Drop here or{' '}
+                    <span className="text-sage underline underline-offset-2">click to browse</span>
+                    {' '}· face photos work best · {state.photos.length}/{MAX_PHOTOS} added
                   </p>
                 </div>
               </>
@@ -192,7 +216,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
           <p className="text-xs text-red-500 font-sans">{uploadError}</p>
         )}
 
-        {state.photos.length > 0 && (
+        {hasPhotos && (
           <div className="flex flex-wrap gap-3">
             {state.photos.map((url, i) => (
               <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden group">
@@ -211,6 +235,48 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
           </div>
         )}
       </div>
+
+      {/* Gender picker — shown when no photos uploaded */}
+      <AnimatePresence>
+        {!hasPhotos && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-3 overflow-hidden"
+          >
+            <div className="flex items-center gap-2">
+              <UserRound className="w-4 h-4 text-forest/50" />
+              <Label className="text-sm font-semibold text-forest/80">
+                How should we portray you?{' '}
+                <span className="text-forest/40 font-normal">(optional)</span>
+              </Label>
+            </div>
+            <p className="font-sans text-xs text-forest/50 -mt-1">
+              Since you haven&apos;t uploaded a photo, this helps us generate imagery that feels like you.
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {GENDER_OPTIONS.map(({ value, label, emoji }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => update({ gender: state.gender === value ? null : value })}
+                  className={cn(
+                    'flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-sans text-sm font-medium transition-all duration-200',
+                    state.gender === value
+                      ? 'border-sage bg-sage-light text-forest shadow-sm'
+                      : 'border-sage/20 text-forest/70 hover:border-sage/40 hover:bg-sage-light/30',
+                  )}
+                >
+                  <span>{emoji}</span>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Style selection */}
       <div className="flex flex-col gap-3">
@@ -233,7 +299,6 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
                     : 'border-sage/20 hover:border-sage/40',
                 )}
               >
-                {/* Image */}
                 <div className="relative h-36 sm:h-44 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -242,32 +307,24 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-forest/40 to-transparent" />
-
-                  {/* Expand button */}
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPreviewImage(option.image);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); setPreviewImage(option.image); }}
                     className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     aria-label="Preview"
                   >
                     <Eye className="h-3.5 w-3.5 text-forest" />
                   </button>
-
                   {selected && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       className="absolute top-2 right-2 w-7 h-7 rounded-full bg-sage flex items-center justify-center shadow-md"
                     >
-                      <Check className="h-4 w-4 text-white" />
+                      <span className="text-white text-xs font-bold">✓</span>
                     </motion.div>
                   )}
                 </div>
-
-                {/* Label */}
                 <div className="p-3 bg-cream">
                   <p className="font-sans text-sm font-semibold text-forest">{option.name}</p>
                   <p className="font-sans text-xs text-forest/55 leading-relaxed mt-0.5">
@@ -286,7 +343,6 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
           <p className="font-display text-lg font-semibold text-forest">See what you&apos;ll create</p>
           <p className="font-sans text-xs text-forest/50 mt-0.5">Real examples of AI-generated dream boards</p>
         </div>
-
         <div className="relative rounded-xl overflow-hidden border border-sage/20">
           <AnimatePresence mode="wait">
             <motion.div
@@ -305,8 +361,6 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
               />
             </motion.div>
           </AnimatePresence>
-
-          {/* Nav arrows */}
           <button
             type="button"
             onClick={() => setExampleIndex((i) => (i - 1 + EXAMPLE_BOARDS.length) % EXAMPLE_BOARDS.length)}
@@ -321,16 +375,12 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
           >
             <ChevronRight className="h-4 w-4 text-forest" />
           </button>
-
-          {/* Caption overlay */}
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-forest/60 to-transparent p-4">
             <p className="font-sans text-sm text-white font-medium">
               {EXAMPLE_BOARDS[exampleIndex].caption}
             </p>
           </div>
         </div>
-
-        {/* Dots */}
         <div className="flex justify-center gap-2">
           {EXAMPLE_BOARDS.map((_, i) => (
             <button
@@ -348,7 +398,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
 
       {/* CTA */}
       <Button variant="gold" size="lg" className="w-full text-base" onClick={next} data-testid="step2-next">
-        Next: Goals →
+        Next: Your Quotes →
       </Button>
 
       {/* Lightbox */}

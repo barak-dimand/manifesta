@@ -22,6 +22,7 @@ const SaveBoardSchema = z.object({
   selectedOffers: z.array(z.string()).optional(),
   selectedQuotes: z.array(z.string()).optional(),
   customQuotes: z.array(z.string()).optional(),
+  gender: z.enum(['male', 'female', 'prefer_not_to_say']).nullable().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { selectedAreas, dreams, style, goals, manifesto, enableTimeline, photoUrls, explorerData, selectedOffers, selectedQuotes, customQuotes } = parsed.data;
+    const { selectedAreas, dreams, style, goals, manifesto, enableTimeline, photoUrls, explorerData, selectedOffers, selectedQuotes, customQuotes, gender } = parsed.data;
 
     const [board] = await getDb()
       .insert(boards)
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
         selectedOffers: selectedOffers?.length ? selectedOffers : ['wallpaper'],
         selectedQuotes: selectedQuotes?.length ? selectedQuotes : null,
         customQuotes: customQuotes?.length ? customQuotes : null,
+        gender: gender ?? null,
       })
       .returning();
 

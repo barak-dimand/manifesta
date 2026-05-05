@@ -206,12 +206,25 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
   ).length;
   const isLast = currentPrompt === EXPLORATION_PROMPTS.length - 1;
 
+  const handleSkip = () => {
+    if (!isLast) {
+      setCurrentPrompt(currentPrompt + 1);
+    } else {
+      handleFinish();
+    }
+  };
+
   return (
     <div className="space-y-5 rounded-2xl border-2 border-sage/20 bg-sage-light/30 p-5">
       {/* Header */}
-      <div className="flex items-center gap-2 text-sage">
-        <Wand2 className="h-4 w-4" />
-        <span className="font-sans text-sm font-semibold">Dream Explorer</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sage">
+          <Wand2 className="h-4 w-4" />
+          <span className="font-sans text-sm font-semibold">Dream Explorer</span>
+        </div>
+        <span className="font-sans text-xs text-forest/40">
+          {currentPrompt + 1} of {EXPLORATION_PROMPTS.length} · all optional
+        </span>
       </div>
 
       {/* Progress dots */}
@@ -359,20 +372,31 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
           disabled={currentPrompt === 0}
           className="font-sans text-sm text-forest/50 hover:text-forest transition-colors disabled:opacity-30"
         >
-          ← Previous
+          ← Back
         </button>
 
-        <div className="flex items-center gap-3">
-          {totalAnswered >= 2 && (
+        <div className="flex items-center gap-2">
+          {/* Skip — always available */}
+          <button
+            onClick={handleSkip}
+            className="font-sans text-sm text-forest/40 hover:text-forest/70 transition-colors"
+          >
+            {isLast ? 'Skip & finish' : 'Skip →'}
+          </button>
+
+          {/* Use answers — available as soon as at least 1 is answered */}
+          {totalAnswered >= 1 && (
             <Button
               variant="outline"
               size="sm"
               onClick={handleFinish}
               className="text-xs"
             >
-              Use my answers ({totalAnswered}/{EXPLORATION_PROMPTS.length})
+              Use {totalAnswered} answer{totalAnswered === 1 ? '' : 's'} ✨
             </Button>
           )}
+
+          {/* Next prompt */}
           {!isLast && (
             <Button
               variant="default"
@@ -385,7 +409,9 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
               <ArrowRight className="h-3 w-3" />
             </Button>
           )}
-          {isLast && totalAnswered >= 2 && (
+
+          {/* Complete on last prompt */}
+          {isLast && (
             <Button
               variant="default"
               size="sm"
@@ -393,7 +419,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
               className="text-xs"
               data-testid="explorer-complete"
             >
-              Complete ✨
+              {totalAnswered > 0 ? `Use ${totalAnswered} answer${totalAnswered === 1 ? '' : 's'} ✨` : 'Finish'}
             </Button>
           )}
         </div>

@@ -23,6 +23,7 @@ export interface WizardState {
   selectedOffers: string[]; // which offer tiers the user selected
   selectedQuotes: string[]; // curated quotes chosen in step 3
   customQuotes: string[]; // user-written quotes / affirmations
+  gender: 'male' | 'female' | 'prefer_not_to_say' | null;
 }
 
 const initialState: WizardState = {
@@ -40,6 +41,7 @@ const initialState: WizardState = {
   selectedOffers: ['wallpaper'],
   selectedQuotes: [],
   customQuotes: [],
+  gender: null,
 };
 
 const STORAGE_KEY = 'manifesta-wizard';

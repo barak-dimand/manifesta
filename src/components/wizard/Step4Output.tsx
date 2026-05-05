@@ -133,6 +133,7 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
         selectedOffers: state.selectedOffers?.length ? state.selectedOffers : ['wallpaper'],
         selectedQuotes: state.selectedQuotes,
         customQuotes: state.customQuotes,
+        gender: state.gender,
       };
 
       const res = await fetch('/api/boards', {

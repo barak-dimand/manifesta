@@ -34,6 +34,7 @@ export const boards = pgTable('boards', {
   selectedOffers: text('selected_offers').array(),
   selectedQuotes: text('selected_quotes').array(),
   customQuotes: text('custom_quotes').array(),
+  gender: text('gender'), // 'male' | 'female' | 'prefer_not_to_say'
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

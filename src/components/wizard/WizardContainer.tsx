@@ -116,6 +116,7 @@ export function WizardContainer() {
       selectedOffers: state.selectedOffers,
       selectedQuotes: state.selectedQuotes,
       customQuotes: state.customQuotes,
+      gender: state.gender,
     };
 
     fetch(`/api/boards/${editBoardIdRef.current}`, {
