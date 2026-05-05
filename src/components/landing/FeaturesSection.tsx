@@ -1,40 +1,44 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Sparkles, Smartphone, Mail, FileText, Target, Shield } from 'lucide-react';
+import { Sparkles, FileText, Headphones, Mail, Camera, Shield } from 'lucide-react';
 
 const features = [
   {
     icon: Sparkles,
-    title: 'AI Vision Board',
-    description: 'Generate a stunning visual board from your dreams and photos in seconds.',
-  },
-  {
-    icon: Smartphone,
-    title: 'Phone Wallpaper',
-    description: 'Get a custom 9:16 wallpaper to see your dreams every time you unlock your phone.',
-  },
-  {
-    icon: Mail,
-    title: 'Daily Reminder Emails',
-    description: 'Wake up to a personalized morning email with your affirmations and habits.',
+    title: 'Dream Board Wallpaper',
+    description: 'Your personalized AI vision board — hand-crafted from your dreams and delivered to your inbox within 24 hours. Free, always.',
+    tag: 'Free',
   },
   {
     icon: FileText,
-    title: 'Personal Manifesto',
-    description:
-      'AI writes your personal manifesto — a powerful declaration of your dream life.',
+    title: 'Manifesta Dream Card',
+    description: 'A beautifully designed PDF with your dream board and a written manifesto — your personal declaration of the life you\'re building. Read it every morning and every night.',
+    tag: '$19',
   },
   {
-    icon: Target,
-    title: 'Goal & Habit System',
-    description:
-      'Turn dreams into concrete goals with daily habits you can actually stick to.',
+    icon: Headphones,
+    title: 'Guided Manifestation Meditations',
+    description: '3 custom audio meditations (5–10 min each) scripted around your specific dreams. Rewire your subconscious. Visualize daily. Accelerate manifestation.',
+    tag: '$39',
+  },
+  {
+    icon: Mail,
+    title: 'Daily Life Coach Emails',
+    description: 'A personalized morning email with motivation, AI-generated vision images, and habit reminders — your coach in your pocket, every single day.',
+    tag: '$17/mo',
+  },
+  {
+    icon: Camera,
+    title: 'Personalized with Your Photos',
+    description: 'Upload a photo of yourself and we\'ll place you as the main character in your vision board — making it viscerally real, not just aspirational.',
+    tag: 'Included',
   },
   {
     icon: Shield,
-    title: 'Private & Secure',
-    description: 'Your dreams are yours. End-to-end encrypted, never shared, always private.',
+    title: 'Your Dreams Stay Yours',
+    description: 'Your answers are private, secure, and never shared. This is your sacred space to dream boldly and honestly — no judgment, no exposure.',
+    tag: 'Always',
   },
 ];
 
@@ -61,13 +65,13 @@ export function FeaturesSection() {
           className="text-center mb-16"
         >
           <p className="text-sm font-sans font-semibold text-sage uppercase tracking-widest mb-3">
-            What You Get
+            What You Receive
           </p>
           <h2 className="font-display text-4xl md:text-5xl text-forest font-semibold">
-            Everything You Need to Manifest
+            A Complete Manifestation System
           </h2>
           <p className="mt-4 text-forest/60 font-sans text-lg max-w-xl mx-auto">
-            A complete system for turning your dreams into your daily reality.
+            From a free dream board to a full daily practice — everything you need to close the gap between where you are and where you want to be.
           </p>
         </motion.div>
 
@@ -85,19 +89,25 @@ export function FeaturesSection() {
               variants={cardVariants}
               whileHover={{ y: -5, boxShadow: '0 12px 40px -8px hsl(150 22% 38% / 0.15)' }}
               transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-              className="group bg-cream rounded-2xl p-7 border border-transparent hover:border-sage/25 shadow-sm transition-colors duration-300"
+              className="group bg-cream rounded-2xl p-7 border border-transparent hover:border-sage/25 shadow-sm transition-colors duration-300 flex flex-col gap-4"
             >
-              {/* Icon circle */}
-              <div className="w-11 h-11 rounded-xl bg-sage-light flex items-center justify-center mb-5 group-hover:bg-sage/15 transition-colors duration-300">
-                <feature.icon className="w-5 h-5 text-sage" />
+              <div className="flex items-start justify-between">
+                <div className="w-11 h-11 rounded-xl bg-sage-light flex items-center justify-center group-hover:bg-sage/15 transition-colors duration-300">
+                  <feature.icon className="w-5 h-5 text-sage" />
+                </div>
+                <span className="font-sans text-xs font-bold text-sage bg-sage-light px-2.5 py-1 rounded-full">
+                  {feature.tag}
+                </span>
               </div>
 
-              <h3 className="font-display text-lg font-semibold text-forest mb-2">
-                {feature.title}
-              </h3>
-              <p className="font-sans text-sm text-forest/65 leading-relaxed">
-                {feature.description}
-              </p>
+              <div>
+                <h3 className="font-display text-lg font-semibold text-forest mb-2">
+                  {feature.title}
+                </h3>
+                <p className="font-sans text-sm text-forest/65 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
             </motion.div>
           ))}
         </motion.div>

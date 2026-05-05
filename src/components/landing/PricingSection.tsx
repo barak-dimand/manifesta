@@ -2,80 +2,73 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, Sparkles, Star, Headphones, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-interface PricingTier {
+interface Tier {
+  id: string;
+  Icon: React.ElementType;
+  badge: string | null;
   name: string;
   price: string;
   period?: string;
-  description: string;
-  features: string[];
+  tagline: string;
+  bullets: string[];
   cta: string;
-  ctaVariant: 'outline' | 'gold' | 'default';
   popular?: boolean;
-  highlighted?: boolean;
+  free?: boolean;
 }
 
-const tiers: PricingTier[] = [
+const tiers: Tier[] = [
   {
-    name: 'Dreamer',
-    price: 'Free',
-    description: 'Start your manifestation journey at no cost.',
-    features: [
-      'Dream board creation',
-      '1 personal manifesto',
-      'Basic phone wallpaper',
-      'Goal & habit tracker',
+    id: 'dream-card',
+    Icon: Star,
+    badge: 'MOST POPULAR',
+    name: 'Manifesta Dream Card',
+    price: '$19',
+    tagline: 'Your dream board + a personal manifesto — a declaration of the life you\'re calling in.',
+    bullets: [
+      'Custom manifesto written for you',
+      'Beautifully designed PDF',
+      'Phone & desktop wallpaper included',
+      'Yours to print & frame',
     ],
-    cta: 'Get Started Free',
-    ctaVariant: 'outline',
-    popular: false,
-  },
-  {
-    name: 'Manifester',
-    price: '$9',
-    period: '/month',
-    description: 'The complete daily manifestation system.',
-    features: [
-      'Everything in Dreamer',
-      'Daily email reminders',
-      'AI-generated wallpaper',
-      'Unlimited dream boards',
-      'Priority AI generation',
-      'Board history & archives',
-    ],
-    cta: 'Start Manifesting',
-    ctaVariant: 'gold',
+    cta: 'Get My Dream Card',
     popular: true,
-    highlighted: true,
   },
   {
-    name: 'Visionary',
-    price: '$29',
-    period: '/month',
-    description: 'For those who are fully committed to their vision.',
-    features: [
-      'Everything in Manifester',
-      'Custom domain vision page',
-      'Print-quality export',
-      '1:1 onboarding call',
-      'White-label exports',
-      'Early access to new features',
+    id: 'meditations',
+    Icon: Headphones,
+    badge: null,
+    name: 'Guided Meditations',
+    price: '$39',
+    tagline: '3 personalized audio meditations to rewire your subconscious and accelerate manifestation.',
+    bullets: [
+      '3 custom audio meditations',
+      '5–10 minutes each',
+      'Scripted around your specific dreams',
+      'Download & keep forever',
     ],
-    cta: 'Go Visionary',
-    ctaVariant: 'default',
-    popular: false,
+    cta: 'Get My Meditations',
+  },
+  {
+    id: 'life-coach',
+    Icon: Mail,
+    badge: null,
+    name: 'Daily Life Coach',
+    price: '$17',
+    period: '/month',
+    tagline: 'Your AI coach in your inbox every morning — motivation, vision images, and reminders.',
+    bullets: [
+      'Daily personalized message',
+      'AI-generated vision images',
+      'Habit & goal reminders',
+      'Cancel anytime',
+    ],
+    cta: 'Start My Coaching',
   },
 ];
-
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12 } },
-};
 
 const cardVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -85,92 +78,139 @@ const cardVariants = {
 export function PricingSection() {
   return (
     <section id="pricing" className="py-24 bg-cream">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-14"
         >
           <p className="text-sm font-sans font-semibold text-sage uppercase tracking-widest mb-3">
-            Pricing
+            Your Journey
           </p>
           <h2 className="font-display text-4xl md:text-5xl text-forest font-semibold">
-            Simple, Transparent Pricing
+            Start Free. Go as Deep as You Want.
           </h2>
           <p className="mt-4 text-forest/60 font-sans text-lg max-w-xl mx-auto">
-            Start free. Upgrade when you&apos;re ready to go deeper.
+            Your dream board wallpaper is always free. Add upgrades to go deeper into your manifestation practice.
           </p>
         </motion.div>
 
-        {/* Cards */}
+        {/* Free tier — full width spotlight */}
         <motion.div
-          variants={containerVariants}
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6 }}
+          className="mb-6"
+        >
+          <div className="rounded-2xl border-2 border-gold/40 bg-gradient-to-r from-gold/5 to-gold/10 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-6">
+            <div className="flex items-center gap-4 flex-1">
+              <div className="w-14 h-14 rounded-2xl bg-gold/20 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-7 h-7 text-gold" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-bold text-gold uppercase tracking-widest">Always Free</span>
+                </div>
+                <h3 className="font-display text-xl font-semibold text-forest">Dream Board Wallpaper</h3>
+                <p className="font-sans text-sm text-forest/60 mt-0.5">
+                  Your personalized AI vision board, hand-crafted and delivered to your inbox within 24 hours.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3 sm:flex-col sm:gap-2 sm:items-end">
+              {['Personalized to your dreams', 'Phone & desktop sizes', 'In your inbox in 24 hrs'].map((b) => (
+                <span key={b} className="flex items-center gap-1.5 font-sans text-xs text-forest/65">
+                  <Check className="w-3.5 h-3.5 text-gold flex-shrink-0" /> {b}
+                </span>
+              ))}
+            </div>
+            <Button variant="gold" size="lg" className="sm:self-center flex-shrink-0 px-8" asChild>
+              <Link href="/create">Create Mine — Free</Link>
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Paid tiers — 3 column */}
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-60px' }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start"
+          transition={{ staggerChildren: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-5"
         >
-          {tiers.map((tier, i) => (
-            <motion.div key={i} variants={cardVariants}>
-              <Card
-                className={cn(
-                  'relative transition-all duration-300',
-                  tier.highlighted
-                    ? 'border-2 border-sage shadow-lg shadow-sage/10 scale-[1.02]'
-                    : 'border border-sage/15 hover:border-sage/30',
-                )}
+          {tiers.map((tier) => (
+            <motion.div
+              key={tier.id}
+              variants={cardVariants}
+              className={cn(
+                'relative rounded-2xl border-2 p-6 flex flex-col gap-5 transition-all duration-300',
+                tier.popular
+                  ? 'border-sage shadow-lg shadow-sage/10 scale-[1.02] bg-white'
+                  : 'border-sage/15 bg-white/70 hover:border-sage/35 hover:shadow-sm',
+              )}
+            >
+              {tier.popular && (
+                <div className="absolute -top-3 left-0 right-0 flex justify-center">
+                  <span className="bg-sage text-white text-[10px] font-bold uppercase tracking-widest px-4 py-1 rounded-full shadow-sm">
+                    Most Popular
+                  </span>
+                </div>
+              )}
+
+              {tier.popular && <div className="pt-2" />}
+
+              {/* Icon + name */}
+              <div className="flex items-start gap-3">
+                <div className={cn(
+                  'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
+                  tier.popular ? 'bg-sage-light' : 'bg-sage-light/60',
+                )}>
+                  <tier.Icon className="w-5 h-5 text-sage" />
+                </div>
+                <div>
+                  {tier.badge && (
+                    <p className="text-[10px] font-bold text-sage uppercase tracking-widest leading-none mb-0.5">
+                      {tier.badge}
+                    </p>
+                  )}
+                  <p className="font-sans font-semibold text-sm text-forest leading-tight">{tier.name}</p>
+                </div>
+              </div>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-0.5">
+                <span className="font-display text-4xl font-bold text-forest">{tier.price}</span>
+                {tier.period && <span className="font-sans text-sm text-forest/50">{tier.period}</span>}
+              </div>
+
+              {/* Tagline */}
+              <p className="font-sans text-xs text-forest/60 leading-relaxed">{tier.tagline}</p>
+
+              {/* Bullets */}
+              <ul className="flex flex-col gap-2.5 flex-1">
+                {tier.bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2">
+                    <div className="w-4 h-4 rounded-full bg-sage-light flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-2.5 h-2.5 text-sage" />
+                    </div>
+                    <span className="font-sans text-xs text-forest/70">{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                variant={tier.popular ? 'gold' : 'outline'}
+                className="w-full mt-auto"
+                size="lg"
+                asChild
               >
-                {/* Popular badge */}
-                {tier.popular && (
-                  <div className="absolute -top-3 left-0 right-0 flex justify-center">
-                    <Badge variant="gold" className="px-4 py-1 text-xs font-semibold shadow-sm">
-                      Most Popular
-                    </Badge>
-                  </div>
-                )}
-
-                <CardHeader className={cn('pb-4', tier.popular && 'pt-8')}>
-                  <p className="font-sans text-xs font-semibold text-sage uppercase tracking-widest mb-1">
-                    {tier.name}
-                  </p>
-                  <div className="flex items-baseline gap-1">
-                    <CardTitle className="text-4xl font-display font-bold text-forest">
-                      {tier.price}
-                    </CardTitle>
-                    {tier.period && (
-                      <span className="text-sm font-sans text-forest/50">{tier.period}</span>
-                    )}
-                  </div>
-                  <p className="text-sm font-sans text-forest/60 mt-1">{tier.description}</p>
-                </CardHeader>
-
-                <CardContent className="flex flex-col gap-5">
-                  {/* Features list */}
-                  <ul className="flex flex-col gap-3">
-                    {tier.features.map((feature, j) => (
-                      <li key={j} className="flex items-center gap-2.5">
-                        <div className="w-4 h-4 rounded-full bg-sage-light flex items-center justify-center flex-shrink-0">
-                          <Check className="w-2.5 h-2.5 text-sage" />
-                        </div>
-                        <span className="text-sm font-sans text-forest/75">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA button */}
-                  <Button
-                    variant={tier.ctaVariant}
-                    className="w-full mt-2"
-                    size="lg"
-                    asChild
-                  >
-                    <Link href="/create">{tier.cta}</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+                <Link href="/create">{tier.cta}</Link>
+              </Button>
             </motion.div>
           ))}
         </motion.div>
@@ -181,9 +221,9 @@ export function PricingSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="text-center text-sm font-sans text-forest/50 mt-8"
+          className="text-center text-sm font-sans text-forest/45 mt-8"
         >
-          No credit card required for free tier. Cancel anytime.
+          Wallpaper is always free — no credit card required. Add upgrades any time during the flow.
         </motion.p>
       </div>
     </section>

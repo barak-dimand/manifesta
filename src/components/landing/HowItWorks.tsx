@@ -1,29 +1,29 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Upload, Wand2, Eye } from 'lucide-react';
+import { Wand2, Sparkles, Inbox } from 'lucide-react';
 
 const steps = [
   {
     number: '01',
-    icon: Upload,
-    title: 'Define Your Dream Life',
+    icon: Wand2,
+    title: 'Tell Us Your Dream Life',
     description:
-      'Answer a few guided questions about the life you want to live. Your career, relationships, health, and everything that matters to you.',
+      'Answer a few guided questions about the life you want to live — your career, relationships, health, and everything that matters most. Takes about 5 minutes.',
   },
   {
     number: '02',
-    icon: Wand2,
-    title: 'AI Creates Your Board',
+    icon: Sparkles,
+    title: 'Choose Your Journey',
     description:
-      'Our AI transforms your answers into a stunning visual dream board and personal manifesto — a declaration of the life you are building.',
+      'Select what resonates with you: a free dream board wallpaper, a personalized manifesto PDF, custom guided meditations, or a daily life coach in your inbox.',
   },
   {
     number: '03',
-    icon: Eye,
-    title: 'Live With It Daily',
+    icon: Inbox,
+    title: 'Receive It. Live It.',
     description:
-      'Set it as your phone wallpaper. Get daily reminders. Make your dream life impossible to forget — until it becomes impossible to ignore.',
+      'Your dream board lands in your inbox within 24 hours. Set it as your wallpaper. Read your manifesto. Let it pull you closer to your dream life every single day.',
   },
 ];
 
@@ -53,10 +53,10 @@ export function HowItWorks() {
             The Process
           </p>
           <h2 className="font-display text-4xl md:text-5xl text-forest font-semibold">
-            How It Works
+            From Dream to Reality in 3 Steps
           </h2>
           <p className="mt-4 text-forest/60 font-sans text-lg max-w-xl mx-auto">
-            From scattered dreams to a daily system in under 10 minutes.
+            Five minutes of intention. A lifetime of direction.
           </p>
         </motion.div>
 
@@ -96,7 +96,7 @@ export function HowItWorks() {
                 </p>
               </div>
 
-              {/* Connector line (not on last) */}
+              {/* Connector line */}
               {i < steps.length - 1 && (
                 <div className="hidden md:block absolute top-14 -right-4 w-8 border-t-2 border-dashed border-sage/25" />
               )}
