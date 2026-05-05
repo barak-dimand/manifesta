@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 export const metadata = { title: 'Dashboard — Manifesta' };
 
-const DAILY_LIMIT = 3;
+const DAILY_LIMIT = 15;
 
 export default async function DashboardPage() {
   const { userId } = await auth();

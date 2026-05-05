@@ -40,7 +40,7 @@ interface ImagesResponse {
   limit: number;
 }
 
-const DAILY_LIMIT = 3;
+const DAILY_LIMIT = 15;
 
 // Full-screen lightbox for viewing an image with all its context
 function ImageLightbox({

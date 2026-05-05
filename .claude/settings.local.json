@@ -15,7 +15,11 @@
       "Bash(nvm use *)",
       "Bash(pnpm lint *)",
       "Bash(grep -E \"\\\\.\\(json|ts|js|md\\)$\")",
-      "Bash(pnpm build *)"
+      "Bash(pnpm build *)",
+      "mcp__vercel__get_runtime_logs",
+      "mcp__vercel__get_deployment_build_logs",
+      "Bash(psql *)",
+      "mcp__vercel__list_deployments"
     ]
   }
 }

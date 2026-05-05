@@ -58,6 +58,7 @@
     "react-hook-form": "^7.74.0",
     "replicate": "^1.4.0",
     "resend": "^6.12.2",
+    "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.4.1"
   },
@@ -69,6 +70,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sharp": "^0.32.0",
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.1",
     "@vitest/coverage-v8": "^4.1.5",

@@ -4,7 +4,7 @@ import { getDb } from '@/lib/db';
 import { generatedWallpapers } from '@/lib/db/schema';
 import { eq, desc, gte, and, count } from 'drizzle-orm';
 
-const DAILY_LIMIT = 3;
+const DAILY_LIMIT = 15;
 
 export async function GET() {
   const { userId } = await auth();

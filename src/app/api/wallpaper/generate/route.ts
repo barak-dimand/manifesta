@@ -12,7 +12,7 @@ import { eq, gte, and, count } from 'drizzle-orm';
 import type { AestheticStyle } from '@/lib/validations/wizard';
 
 const ROUTE = '/api/wallpaper/generate';
-const DAILY_LIMIT = 3;
+const DAILY_LIMIT = 15;
 
 function getReplicate() {
   return new Replicate({ auth: process.env.REPLICATE_API_TOKEN!, useFileOutput: false });
