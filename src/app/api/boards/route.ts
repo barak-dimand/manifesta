@@ -18,6 +18,7 @@ const SaveBoardSchema = z.object({
   enableTimeline: z.boolean().optional(),
   photoUrls: z.array(z.string()).optional(),
   explorerData: z.unknown().optional(),
+  selectedOffers: z.array(z.string()).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { selectedAreas, dreams, style, goals, manifesto, enableTimeline, photoUrls, explorerData } = parsed.data;
+    const { selectedAreas, dreams, style, goals, manifesto, enableTimeline, photoUrls, explorerData, selectedOffers } = parsed.data;
 
     const [board] = await getDb()
       .insert(boards)
@@ -60,6 +61,7 @@ export async function POST(request: NextRequest) {
         enableTimeline: enableTimeline ?? false,
         photoUrls: photoUrls?.length ? photoUrls : null,
         explorerData: explorerData ?? null,
+        selectedOffers: selectedOffers?.length ? selectedOffers : ['wallpaper'],
       })
       .returning();
 

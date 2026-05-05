@@ -20,7 +20,7 @@ const STEPS = [
   { label: 'Dream Life', index: 0 },
   { label: 'Photos & Style', index: 1 },
   { label: 'Goals', index: 2 },
-  { label: 'Your Board', index: 3 },
+  { label: 'Your Journey', index: 3 },
 ];
 
 export function WizardContainer() {
@@ -95,17 +95,14 @@ export function WizardContainer() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-save: POST for new boards, PUT for edits
+  // Auto-save for EDIT mode only (PUT) — new board save is handled by Step4's Claim button
   useEffect(() => {
-    if (!isSignedIn || state.step !== 3 || !state.manifesto) return;
-
     const isEdit = !!editBoardIdRef.current;
-    // For new boards, don't re-save once boardId is set
-    if (!isEdit && state.boardId) return;
+    if (!isEdit) return;
+    if (!isSignedIn || state.step !== 3) return;
     if (autoSaveRef.current) return;
     autoSaveRef.current = true;
 
-    // Save all raw inputs — keep goals even if incomplete so no data is lost
     const goals = state.goals.filter((g) => g.objective.trim() || g.habit.trim());
     const body = {
       selectedAreas: state.selectedAreas,
@@ -116,13 +113,11 @@ export function WizardContainer() {
       enableTimeline: state.enableTimeline,
       photoUrls: state.photos.filter((p) => p.startsWith('http')),
       explorerData: state.explorerPromptStates,
+      selectedOffers: state.selectedOffers,
     };
 
-    const url = isEdit ? `/api/boards/${editBoardIdRef.current}` : '/api/boards';
-    const method = isEdit ? 'PUT' : 'POST';
-
-    fetch(url, {
-      method,
+    fetch(`/api/boards/${editBoardIdRef.current}`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
@@ -131,7 +126,7 @@ export function WizardContainer() {
         if (data.board?.id) update({ boardId: data.board.id });
       })
       .catch(console.error);
-  }, [isSignedIn, state.step, state.manifesto, state.boardId, state.selectedAreas, state.dreams, state.style, state.goals, state.enableTimeline, state.photos, state.explorerPromptStates, update]);
+  }, [isSignedIn, state.step, state.selectedAreas, state.dreams, state.style, state.goals, state.manifesto, state.enableTimeline, state.photos, state.explorerPromptStates, state.selectedOffers, update]);
 
   const slideVariants = {
     enter: (d: number) => ({ x: d * 60, opacity: 0 }),

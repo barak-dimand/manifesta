@@ -20,6 +20,7 @@ export interface WizardState {
   enableTimeline: boolean;
   manifesto: string;
   boardId: string | null; // set after successful post-auth board save
+  selectedOffers: string[]; // which offer tiers the user selected
 }
 
 const initialState: WizardState = {
@@ -34,6 +35,7 @@ const initialState: WizardState = {
   enableTimeline: false,
   manifesto: '',
   boardId: null,
+  selectedOffers: ['wallpaper'],
 };
 
 const STORAGE_KEY = 'manifesta-wizard';
