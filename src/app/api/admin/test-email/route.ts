@@ -10,9 +10,11 @@ export async function POST() {
   const fromEmail = process.env.RESEND_FROM_EMAIL ?? '(not set — defaulting to hello@manifesta.app)';
   const hasApiKey = !!process.env.RESEND_API_KEY;
 
+  // With onboarding@resend.dev, Resend only delivers to the account's own email.
+  // We send to both addresses so you can confirm which one actually arrives.
   const results = await Promise.allSettled([
     sendBoardConfirmation({
-      to: 'bdimandailife@gmail.com',
+      to: 'barakdimand6@gmail.com',
       firstName: 'Barak',
       dreams: 'Building a product that helps millions of people manifest their dream lives.',
       selectedOffers: ['wallpaper', 'dream-card', 'life-coach'],
