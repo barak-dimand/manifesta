@@ -10,7 +10,10 @@ import { LifeArea, AestheticStyle, GoalSchema } from '@/lib/validations/wizard';
 const ROUTE = '/api/boards/[id]';
 
 const PatchBoardSchema = z.object({
-  wallpaperUrl: z.string().url(),
+  wallpaperUrl: z.string().url().optional(),
+  name: z.string().max(100).optional(),
+}).refine((d) => d.wallpaperUrl !== undefined || d.name !== undefined, {
+  message: 'At least one of wallpaperUrl or name is required',
 });
 
 const PutBoardSchema = z.object({
@@ -116,16 +119,44 @@ export async function PATCH(
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
+    const update: Record<string, unknown> = { updatedAt: new Date() };
+    if (parsed.data.wallpaperUrl !== undefined) update.wallpaperUrl = parsed.data.wallpaperUrl;
+    if (parsed.data.name !== undefined) update.name = parsed.data.name || null;
+
     const [board] = await getDb()
       .update(boards)
-      .set({ wallpaperUrl: parsed.data.wallpaperUrl, updatedAt: new Date() })
+      .set(update)
       .where(and(eq(boards.id, id), eq(boards.userId, userId)))
       .returning();
 
     if (!board) return NextResponse.json({ error: 'Board not found' }, { status: 404 });
     return NextResponse.json({ board });
   } catch (err) {
-    await logger.error('Board wallpaper update failed', { route: ROUTE, details: serializeError(err) });
+    await logger.error('Board update failed', { route: ROUTE, details: serializeError(err) });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { id } = await params;
+    const [deleted] = await getDb()
+      .delete(boards)
+      .where(and(eq(boards.id, id), eq(boards.userId, userId)))
+      .returning({ id: boards.id });
+
+    if (!deleted) return NextResponse.json({ error: 'Board not found' }, { status: 404 });
+
+    await logger.info('Board deleted', { route: ROUTE, userId, details: { boardId: id } });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    await logger.error('Board delete failed', { route: ROUTE, details: serializeError(err) });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

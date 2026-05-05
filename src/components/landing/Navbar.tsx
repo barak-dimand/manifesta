@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Sparkles, Menu, X, LayoutDashboard } from 'lucide-react';
+import { Sparkles, Menu, X, LayoutDashboard, LogOut, Plus } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -18,14 +18,29 @@ const navLinks = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const avatarRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const { isSignedIn, isLoaded, user } = useUser();
+  const { signOut } = useClerk();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close avatar dropdown on outside click
+  useEffect(() => {
+    if (!avatarOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setAvatarOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [avatarOpen]);
 
   const isMenuOpen = isMobile && mobileOpen;
 
@@ -77,22 +92,46 @@ export function Navbar() {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
             {isLoaded && isSignedIn ? (
-              <>
+              <div ref={avatarRef} className="relative flex items-center gap-3">
                 <Link
-                  href="/dashboard"
-                  className="flex items-center gap-1.5 text-sm font-sans text-forest/70 hover:text-forest transition-colors"
+                  href="/create?new=1"
+                  className="flex items-center gap-1 text-sm font-sans font-semibold text-sage hover:text-forest transition-colors"
                 >
-                  <LayoutDashboard className="w-4 h-4" />
-                  Dashboard
+                  <Plus className="w-3.5 h-3.5" /> New Board
                 </Link>
-                <Link href="/create">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-sage flex items-center justify-center text-white text-xs font-bold font-sans">
-                      {initials}
-                    </div>
-                  </div>
-                </Link>
-              </>
+                <button
+                  onClick={() => setAvatarOpen((v) => !v)}
+                  className="w-8 h-8 rounded-full bg-sage flex items-center justify-center text-white text-xs font-bold font-sans hover:bg-sage/80 transition-colors focus:outline-none"
+                  aria-label="Account menu"
+                >
+                  {initials}
+                </button>
+                <AnimatePresence>
+                  {avatarOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-10 w-44 rounded-xl bg-cream border border-sage/20 shadow-lg overflow-hidden z-50"
+                    >
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setAvatarOpen(false)}
+                        className="flex items-center gap-2 px-4 py-3 font-sans text-sm text-forest/80 hover:bg-sage-light/50 hover:text-forest transition-colors"
+                      >
+                        <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard
+                      </Link>
+                      <button
+                        onClick={() => { setAvatarOpen(false); void signOut(); }}
+                        className="w-full flex items-center gap-2 px-4 py-3 font-sans text-sm text-forest/80 hover:bg-sage-light/50 hover:text-forest transition-colors border-t border-sage/10"
+                      >
+                        <LogOut className="w-3.5 h-3.5" /> Sign out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
               <>
                 <Link
@@ -148,14 +187,19 @@ export function Navbar() {
                     className="flex items-center gap-2 text-sm font-sans text-forest/70 hover:text-forest py-2 border-b border-sage/10"
                     onClick={() => setMobileOpen(false)}
                   >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
+                    <LayoutDashboard className="w-4 h-4" /> Dashboard
                   </Link>
                   <Button variant="gold" className="w-full mt-1" asChild>
-                    <Link href="/create" onClick={() => setMobileOpen(false)}>
-                      New Board
+                    <Link href="/create?new=1" onClick={() => setMobileOpen(false)}>
+                      + New Board
                     </Link>
                   </Button>
+                  <button
+                    onClick={() => { setMobileOpen(false); void signOut(); }}
+                    className="flex items-center gap-2 text-sm font-sans text-forest/60 hover:text-forest py-2 mt-1"
+                  >
+                    <LogOut className="w-4 h-4" /> Sign out
+                  </button>
                 </>
               ) : (
                 <>

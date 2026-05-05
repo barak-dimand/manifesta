@@ -30,6 +30,7 @@ export const boards = pgTable('boards', {
   enableTimeline: boolean('enable_timeline').default(false),
   photoUrls: text('photo_urls').array(),
   explorerData: jsonb('explorer_data'),
+  name: text('name'),
   selectedOffers: text('selected_offers').array(),
   selectedQuotes: text('selected_quotes').array(),
   customQuotes: text('custom_quotes').array(),
