@@ -79,7 +79,7 @@ async function runReplicate(
           prompt_strength: params.imagePromptStrength,
           aspect_ratio: '9:16',
           num_outputs: 1,
-          output_format: 'webp',
+          output_format: 'jpg',
           num_inference_steps: params.steps,
           guidance: params.guidance,
           go_fast: true,
@@ -93,7 +93,7 @@ async function runReplicate(
           image_prompt: imageBlob,
           image_prompt_strength: params.imagePromptStrength,
           aspect_ratio: '9:16',
-          output_format: 'webp',
+          output_format: 'jpg',
           output_quality: 90,
           safety_tolerance: 2,
         },
@@ -110,19 +110,19 @@ async function runReplicate(
   switch (modelId) {
     case 'black-forest-labs/flux-schnell':
       output = await replicate.run('black-forest-labs/flux-schnell', {
-        input: { prompt, aspect_ratio: '9:16', num_outputs: 1, output_format: 'webp', go_fast: true },
+        input: { prompt, aspect_ratio: '9:16', num_outputs: 1, output_format: 'jpg', go_fast: true },
       });
       break;
 
     case 'black-forest-labs/flux-1.1-pro':
       output = await replicate.run('black-forest-labs/flux-1.1-pro', {
-        input: { prompt, aspect_ratio: '9:16', output_format: 'webp', output_quality: 90 },
+        input: { prompt, aspect_ratio: '9:16', output_format: 'jpg', output_quality: 90 },
       });
       break;
 
     case 'black-forest-labs/flux-1.1-pro-ultra':
       output = await replicate.run('black-forest-labs/flux-1.1-pro-ultra', {
-        input: { prompt, aspect_ratio: '9:16', output_format: 'webp', output_quality: 90, safety_tolerance: 2 },
+        input: { prompt, aspect_ratio: '9:16', output_format: 'jpg', output_quality: 90, safety_tolerance: 2 },
       });
       break;
 
@@ -145,7 +145,7 @@ async function runReplicate(
           prompt,
           aspect_ratio: '9:16',
           num_outputs: 1,
-          output_format: 'webp',
+          output_format: 'jpg',
           num_inference_steps: params.steps,
           guidance: params.guidance,
           go_fast: true,
