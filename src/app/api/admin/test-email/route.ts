@@ -1,49 +1,53 @@
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
 import { requireAdmin } from '@/lib/admin';
-import { sendBoardConfirmation, sendAdminNewSignup } from '@/lib/email/send';
 
 export async function POST() {
   const guard = await requireAdmin();
   if (guard instanceof NextResponse) return guard;
 
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'hello@joinmanifesta.com';
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://joinmanifesta.com';
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? '(not set — defaulting to hello@joinmanifesta.com)';
-  const hasApiKey = !!process.env.RESEND_API_KEY;
 
-  // With onboarding@resend.dev, Resend only delivers to the account's own email.
-  // We send to both addresses so you can confirm which one actually arrives.
+  if (!apiKey) {
+    return NextResponse.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 });
+  }
+
+  const resend = new Resend(apiKey);
+
+  // Send a simple plain-text test to both inboxes to cut through any HTML rendering issues
   const results = await Promise.allSettled([
-    sendBoardConfirmation({
+    resend.emails.send({
+      from: fromEmail,
       to: 'barakdimand6@gmail.com',
-      firstName: 'Barak',
-      dreams: 'Building a product that helps millions of people manifest their dream lives.',
-      selectedOffers: ['wallpaper', 'dream-card', 'life-coach'],
-      dashboardUrl: `${appUrl}/dashboard`,
+      subject: '[Manifesta Test] barakdimand6 inbox check',
+      text: `Test email from ${fromEmail} via Resend. App URL: ${appUrl}. If you see this, delivery is working.`,
     }),
-    sendAdminNewSignup({
-      userEmail: 'testuser@example.com',
-      firstName: 'Test',
-      lastName: 'User',
-      dreams: 'Building a product that helps millions of people manifest their dream lives.',
-      selectedAreas: ['career', 'health', 'relationships'],
-      selectedOffers: ['wallpaper', 'dream-card'],
-      boardId: 'test-board-id-123',
-      appUrl,
+    resend.emails.send({
+      from: fromEmail,
+      to: 'bdimandailife@gmail.com',
+      subject: '[Manifesta Test] bdimandailife inbox check',
+      text: `Test email from ${fromEmail} via Resend. App URL: ${appUrl}. If you see this, delivery is working.`,
     }),
   ]);
 
   const output = results.map((r, i) => {
-    const label = i === 0 ? 'user_confirmation' : 'admin_notification';
+    const to = i === 0 ? 'barakdimand6@gmail.com' : 'bdimandailife@gmail.com';
     if (r.status === 'fulfilled') {
-      return { email: label, status: 'sent', resend_id: (r.value as { id?: string })?.id };
+      const { data, error } = r.value;
+      if (error) {
+        return { to, status: 'resend_error', error };
+      }
+      return { to, status: 'sent', resend_id: data?.id };
     }
-    return { email: label, status: 'failed', error: String(r.reason) };
+    return { to, status: 'exception', error: String(r.reason) };
   });
 
   const allOk = output.every((o) => o.status === 'sent');
   return NextResponse.json({
     ok: allOk,
-    config: { from: fromEmail, api_key_set: hasApiKey },
+    config: { from: fromEmail, api_key_set: true, app_url: appUrl },
     emails: output,
   }, { status: allOk ? 200 : 500 });
 }
