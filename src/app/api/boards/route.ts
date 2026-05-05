@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       details: { boardId: board.id, style, areas: selectedAreas },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://manifesta.app';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://joinmanifesta.com';
     const firstName = user?.firstName ?? null;
 
     // Fire both emails in parallel, non-blocking — never fail the request if email fails

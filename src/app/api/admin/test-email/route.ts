@@ -6,8 +6,8 @@ export async function POST() {
   const guard = await requireAdmin();
   if (guard instanceof NextResponse) return guard;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://manifesta.app';
-  const fromEmail = process.env.RESEND_FROM_EMAIL ?? '(not set — defaulting to hello@manifesta.app)';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://joinmanifesta.com';
+  const fromEmail = process.env.RESEND_FROM_EMAIL ?? '(not set — defaulting to hello@joinmanifesta.com)';
   const hasApiKey = !!process.env.RESEND_API_KEY;
 
   // With onboarding@resend.dev, Resend only delivers to the account's own email.
