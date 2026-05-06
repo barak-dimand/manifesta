@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Quote, Search, Plus, X, Sparkles, Heart, Brain, Rocket, Sun, Star } from 'lucide-react';
+import { Quote, Search, Plus, X, Sparkles, Heart, Brain, Rocket, Sun, Star, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { WizardState } from '@/hooks/use-wizard';
 import { cn } from '@/lib/utils';
@@ -33,11 +33,11 @@ const CURATED_QUOTES = [
   { text: 'You deserve the love you keep giving everyone else.', author: 'Unknown', category: 'self-love' },
   { text: 'The only limit to our realization of tomorrow is our doubts of today.', author: 'Franklin D. Roosevelt', category: 'motivation' },
   { text: 'Your vibe attracts your tribe.', author: 'Unknown', category: 'abundance' },
-  { text: 'Everything you\'ve ever wanted is on the other side of fear.', author: 'George Addair', category: 'motivation' },
+  { text: "Everything you've ever wanted is on the other side of fear.", author: 'George Addair', category: 'motivation' },
   { text: 'You are worthy of the life you dream about.', author: 'Unknown', category: 'self-love' },
-  { text: 'Stars can\'t shine without darkness.', author: 'D.H. Sidebottom', category: 'dreams' },
+  { text: "Stars can't shine without darkness.", author: 'D.H. Sidebottom', category: 'dreams' },
   { text: 'The energy you put out is the energy you get back.', author: 'Unknown', category: 'abundance' },
-  { text: 'Don\'t wait for opportunity. Create it.', author: 'George Bernard Shaw', category: 'motivation' },
+  { text: "Don't wait for opportunity. Create it.", author: 'George Bernard Shaw', category: 'motivation' },
   { text: 'Your thoughts create your reality. Choose them wisely.', author: 'Unknown', category: 'mindset' },
   { text: 'In a world where you can be anything, be kind to yourself first.', author: 'Unknown', category: 'self-love' },
   { text: 'The best time to plant a tree was 20 years ago. The second best time is now.', author: 'Chinese Proverb', category: 'dreams' },
@@ -50,25 +50,70 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [customInput, setCustomInput] = useState('');
+  // originalText -> editedText for curated quotes the user has tweaked
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  // which curated quote is currently being edited (by original text key)
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState('');
+  const editInputRef = useRef<HTMLInputElement>(null);
+  // which custom quote index is being edited
+  const [editingCustomIdx, setEditingCustomIdx] = useState<number | null>(null);
+  const [editCustomDraft, setEditCustomDraft] = useState('');
+  const editCustomRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingKey !== null) editInputRef.current?.focus();
+  }, [editingKey]);
+
+  useEffect(() => {
+    if (editingCustomIdx !== null) editCustomRef.current?.focus();
+  }, [editingCustomIdx]);
 
   const selectedQuotes = state.selectedQuotes ?? [];
   const customQuotes = state.customQuotes ?? [];
 
+  const getDisplayText = (original: string) => edits[original] ?? original;
+
   const filteredQuotes = CURATED_QUOTES.filter((q) => {
     const matchesCategory = activeCategory === 'all' || q.category === activeCategory;
+    const display = getDisplayText(q.text).toLowerCase();
     const matchesSearch =
       !searchQuery ||
-      q.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      display.includes(searchQuery.toLowerCase()) ||
       q.author.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const toggleQuote = (text: string) => {
-    update({
-      selectedQuotes: selectedQuotes.includes(text)
-        ? selectedQuotes.filter((q) => q !== text)
-        : [...selectedQuotes, text],
-    });
+  const toggleQuote = (original: string) => {
+    const display = getDisplayText(original);
+    if (selectedQuotes.includes(display)) {
+      update({ selectedQuotes: selectedQuotes.filter((q) => q !== display) });
+    } else {
+      update({ selectedQuotes: [...selectedQuotes, display] });
+    }
+  };
+
+  const startEdit = (original: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingKey(original);
+    setEditDraft(getDisplayText(original));
+  };
+
+  const saveEdit = (original: string) => {
+    const trimmed = editDraft.trim();
+    if (!trimmed) { setEditingKey(null); return; }
+    const prevDisplay = getDisplayText(original);
+    // Update edits map
+    if (trimmed !== original) {
+      setEdits((prev) => ({ ...prev, [original]: trimmed }));
+    } else {
+      setEdits((prev) => { const n = { ...prev }; delete n[original]; return n; });
+    }
+    // Update selectedQuotes if this quote was already selected
+    if (selectedQuotes.includes(prevDisplay)) {
+      update({ selectedQuotes: selectedQuotes.map((q) => q === prevDisplay ? trimmed : q) });
+    }
+    setEditingKey(null);
   };
 
   const addCustomQuote = () => {
@@ -83,6 +128,21 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
     update({ customQuotes: customQuotes.filter((cq) => cq !== q) });
   };
 
+  const startEditCustom = (idx: number) => {
+    setEditingCustomIdx(idx);
+    setEditCustomDraft(customQuotes[idx]);
+  };
+
+  const saveEditCustom = (idx: number) => {
+    const trimmed = editCustomDraft.trim();
+    if (trimmed) {
+      const next = [...customQuotes];
+      next[idx] = trimmed;
+      update({ customQuotes: next });
+    }
+    setEditingCustomIdx(null);
+  };
+
   const totalSelected = selectedQuotes.length + customQuotes.length;
 
   return (
@@ -93,7 +153,7 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
           Words that move you
         </h1>
         <p className="font-sans text-forest/60 text-base">
-          Choose quotes that resonate with your dream life — they&apos;ll be woven into your board and wallpaper.
+          Choose quotes that resonate — tap to select, tap the pencil to make them your own, or write something new.
         </p>
       </div>
 
@@ -147,41 +207,80 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
       <div className="flex flex-col gap-3 max-h-[380px] overflow-y-auto pr-1">
         <AnimatePresence>
           {filteredQuotes.map((q) => {
-            const isSelected = selectedQuotes.includes(q.text);
+            const display = getDisplayText(q.text);
+            const isSelected = selectedQuotes.includes(display);
+            const isEdited = !!edits[q.text];
+            const isEditing = editingKey === q.text;
+
             return (
-              <motion.button
+              <motion.div
                 key={q.text}
                 layout
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                whileTap={{ scale: 0.98 }}
-                type="button"
-                onClick={() => toggleQuote(q.text)}
+                onClick={() => !isEditing && toggleQuote(q.text)}
                 className={cn(
-                  'w-full text-left rounded-xl p-4 border-2 transition-all duration-200',
+                  'w-full text-left rounded-xl p-4 border-2 transition-all duration-200 cursor-pointer',
                   isSelected
                     ? 'border-sage bg-sage-light/40 shadow-sm'
                     : 'border-sage/15 bg-white/60 hover:border-sage/35',
                 )}
               >
                 <div className="flex items-start gap-3">
-                  <Quote className={cn('h-4 w-4 mt-0.5 flex-shrink-0', isSelected ? 'text-sage' : 'text-forest/25')} />
-                  <div className="space-y-1">
-                    <p className="font-display italic text-sm text-forest leading-relaxed">
-                      &ldquo;{q.text}&rdquo;
-                    </p>
+                  <Quote className={cn('h-4 w-4 mt-0.5 flex-shrink-0 transition-colors', isSelected ? 'text-sage' : 'text-forest/25')} />
+
+                  <div className="flex-1 space-y-1 min-w-0">
+                    {isEditing ? (
+                      <input
+                        ref={editInputRef}
+                        value={editDraft}
+                        onChange={(e) => setEditDraft(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        onBlur={() => saveEdit(q.text)}
+                        onKeyDown={(e) => {
+                          e.stopPropagation();
+                          if (e.key === 'Enter') saveEdit(q.text);
+                          if (e.key === 'Escape') setEditingKey(null);
+                        }}
+                        className="w-full rounded-lg border border-sage/40 bg-white px-3 py-1.5 font-display italic text-sm text-forest focus:border-sage focus:outline-none"
+                      />
+                    ) : (
+                      <p className="font-display italic text-sm text-forest leading-relaxed">
+                        &ldquo;{display}&rdquo;
+                        {isEdited && <span className="ml-1.5 font-sans not-italic text-[10px] text-sage/60">(edited)</span>}
+                      </p>
+                    )}
                     <p className="font-sans text-xs text-forest/50">— {q.author}</p>
                   </div>
-                  {isSelected && (
-                    <div className="ml-auto flex-shrink-0 w-5 h-5 rounded-full bg-sage flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
-                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                  )}
+
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {/* Edit pencil — always visible on selected, hover on unselected */}
+                    {!isEditing && (
+                      <button
+                        type="button"
+                        onClick={(e) => startEdit(q.text, e)}
+                        title="Edit quote"
+                        className={cn(
+                          'w-6 h-6 rounded-full flex items-center justify-center transition-all',
+                          isSelected
+                            ? 'text-sage/60 hover:text-sage hover:bg-sage-light'
+                            : 'text-forest/20 hover:text-forest/50 hover:bg-sage-light/40 opacity-0 group-hover:opacity-100',
+                        )}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                    )}
+                    {isSelected && !isEditing && (
+                      <div className="w-5 h-5 rounded-full bg-sage flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
+                          <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </motion.button>
+              </motion.div>
             );
           })}
         </AnimatePresence>
@@ -191,7 +290,7 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
       <div className="flex flex-col gap-3 border-t border-sage/10 pt-5">
         <p className="font-sans text-sm font-semibold text-forest/80 flex items-center gap-2">
           <Plus className="h-4 w-4 text-sage" />
-          Add your own quote or affirmation
+          Write your own quote or affirmation
         </p>
         <div className="flex gap-2">
           <input
@@ -213,22 +312,50 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
 
         {customQuotes.length > 0 && (
           <div className="flex flex-col gap-2">
-            {customQuotes.map((q) => (
+            {customQuotes.map((q, idx) => (
               <motion.div
-                key={q}
+                key={idx}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center gap-2 rounded-xl border-2 border-sage bg-sage-light/40 p-3"
               >
                 <Quote className="h-3.5 w-3.5 text-sage flex-shrink-0" />
-                <p className="font-display italic text-sm text-forest flex-1">&ldquo;{q}&rdquo;</p>
-                <button
-                  type="button"
-                  onClick={() => removeCustomQuote(q)}
-                  className="text-forest/40 hover:text-forest transition-colors"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+
+                {editingCustomIdx === idx ? (
+                  <input
+                    ref={editCustomRef}
+                    value={editCustomDraft}
+                    onChange={(e) => setEditCustomDraft(e.target.value)}
+                    onBlur={() => saveEditCustom(idx)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveEditCustom(idx);
+                      if (e.key === 'Escape') setEditingCustomIdx(null);
+                    }}
+                    className="flex-1 rounded-lg border border-sage/40 bg-white px-2 py-1 font-display italic text-sm text-forest focus:border-sage focus:outline-none"
+                  />
+                ) : (
+                  <p className="font-display italic text-sm text-forest flex-1">&ldquo;{q}&rdquo;</p>
+                )}
+
+                <div className="flex items-center gap-1">
+                  {editingCustomIdx !== idx && (
+                    <button
+                      type="button"
+                      onClick={() => startEditCustom(idx)}
+                      title="Edit"
+                      className="text-sage/50 hover:text-sage transition-colors"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeCustomQuote(q)}
+                    className="text-forest/40 hover:text-forest transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </motion.div>
             ))}
           </div>

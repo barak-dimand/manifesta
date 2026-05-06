@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Upload, X, Eye, ChevronLeft, ChevronRight, UserRound } from 'lucide-react';
+import { Upload, X, Eye, UserRound } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -52,11 +52,6 @@ const STYLE_OPTIONS: StyleOption[] = [
   },
 ];
 
-const EXAMPLE_BOARDS = [
-  { image: '/images/example-board-1.jpg', caption: 'Wellness & Ocean Living Board' },
-  { image: '/images/example-board-2.jpg', caption: 'Career Success & Abundance Board' },
-];
-
 const GENDER_OPTIONS: { value: WizardState['gender']; label: string; emoji: string }[] = [
   { value: 'female', label: 'Female', emoji: '👩' },
   { value: 'male', label: 'Male', emoji: '👨' },
@@ -66,7 +61,6 @@ const GENDER_OPTIONS: { value: WizardState['gender']; label: string; emoji: stri
 export function Step2PhotosStyle({ state, update, next }: Step2Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [exampleIndex, setExampleIndex] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -334,65 +328,6 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
               </motion.button>
             );
           })}
-        </div>
-      </div>
-
-      {/* Example boards carousel */}
-      <div className="flex flex-col gap-3">
-        <div className="text-center">
-          <p className="font-display text-lg font-semibold text-forest">See what you&apos;ll create</p>
-          <p className="font-sans text-xs text-forest/50 mt-0.5">Real examples of AI-generated dream boards</p>
-        </div>
-        <div className="relative rounded-xl overflow-hidden border border-sage/20">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={exampleIndex}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={EXAMPLE_BOARDS[exampleIndex].image}
-                alt={EXAMPLE_BOARDS[exampleIndex].caption}
-                className="w-full h-56 sm:h-72 object-cover cursor-pointer"
-                onClick={() => setPreviewImage(EXAMPLE_BOARDS[exampleIndex].image)}
-              />
-            </motion.div>
-          </AnimatePresence>
-          <button
-            type="button"
-            onClick={() => setExampleIndex((i) => (i - 1 + EXAMPLE_BOARDS.length) % EXAMPLE_BOARDS.length)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
-          >
-            <ChevronLeft className="h-4 w-4 text-forest" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setExampleIndex((i) => (i + 1) % EXAMPLE_BOARDS.length)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-sm"
-          >
-            <ChevronRight className="h-4 w-4 text-forest" />
-          </button>
-          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-forest/60 to-transparent p-4">
-            <p className="font-sans text-sm text-white font-medium">
-              {EXAMPLE_BOARDS[exampleIndex].caption}
-            </p>
-          </div>
-        </div>
-        <div className="flex justify-center gap-2">
-          {EXAMPLE_BOARDS.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setExampleIndex(i)}
-              className={cn(
-                'h-1.5 rounded-full transition-all duration-300',
-                i === exampleIndex ? 'w-6 bg-sage' : 'w-3 bg-sage/20',
-              )}
-            />
-          ))}
         </div>
       </div>
 
