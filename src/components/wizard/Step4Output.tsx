@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import type { WizardState } from '@/hooks/use-wizard';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/lib/analytics';
 
 interface Step4Props {
   state: WizardState;
@@ -108,9 +109,11 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
   const toggleOffer = (id: string) => {
     if (id === 'wallpaper') return; // always included
     const current = state.selectedOffers ?? ['wallpaper'];
-    const next = current.includes(id)
+    const action = current.includes(id) ? 'removed' : 'added';
+    const next = action === 'removed'
       ? current.filter((o) => o !== id)
       : [...current, id];
+    analytics.offerToggled(id, action);
     update({ selectedOffers: next });
   };
 
@@ -150,6 +153,17 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
       }
 
       update({ boardId: data.board.id });
+      const savedOffers = state.selectedOffers?.length ? state.selectedOffers : ['wallpaper'];
+      analytics.boardSaved({
+        boardId: data.board.id,
+        offers: savedOffers,
+        hasPaid: OFFERS.some((o) => !o.free && savedOffers.includes(o.id)),
+        areas: state.selectedAreas,
+        style: state.style ?? '',
+        hasPhotos: state.photos.length > 0,
+        quoteCount: (state.selectedQuotes?.length ?? 0) + (state.customQuotes?.length ?? 0),
+        gender: state.gender,
+      });
       setPhase('confirmed');
     } catch {
       setSaveError('Something went wrong. Please try again.');
@@ -163,6 +177,7 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
   const handleClaimClick = () => {
     if (!isLoaded) return;
     if (!isSignedIn) {
+      analytics.signInTriggered('board_save');
       pendingSave.current = true;
       openSignIn();
       return;

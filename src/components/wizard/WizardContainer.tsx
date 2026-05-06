@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { useWizard } from '@/hooks/use-wizard';
+import { analytics } from '@/lib/analytics';
 import { Step1DreamLife } from '@/components/wizard/Step1DreamLife';
 import { Step2PhotosStyle } from '@/components/wizard/Step2PhotosStyle';
 import { Step3Quotes } from '@/components/wizard/Step3Quotes';
@@ -32,6 +33,7 @@ export function WizardContainer() {
   const autoSaveRef = useRef(false);
   const editBoardIdRef = useRef<string | null>(null);
   const initDoneRef = useRef(false);
+  const trackedStartRef = useRef(false);
 
   // Handle ?new=1 (reset) and ?boardId=xxx (edit) on mount
   useEffect(() => {
@@ -94,6 +96,19 @@ export function WizardContainer() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Track wizard started once on mount
+  useEffect(() => {
+    if (trackedStartRef.current) return;
+    trackedStartRef.current = true;
+    analytics.wizardStarted();
+  }, []);
+
+  // Track step viewed on every step change
+  useEffect(() => {
+    const STEP_NAMES = ['Dream Life', 'Photos & Style', 'Quotes', 'Your Journey'];
+    analytics.wizardStepViewed(state.step, STEP_NAMES[state.step] ?? '');
+  }, [state.step]);
 
   // Auto-save for EDIT mode only (PUT) — new board save is handled by Step4's Claim button
   useEffect(() => {

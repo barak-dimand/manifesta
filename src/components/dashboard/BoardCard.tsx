@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Pencil, Trash2, Link2, Check, X } from 'lucide-react';
 import type { Board } from '@/lib/db/schema';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/lib/analytics';
 
 export function BoardCard({ board }: { board: Board }) {
   const router = useRouter();
@@ -33,6 +34,7 @@ export function BoardCard({ board }: { board: Board }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: trimmed }),
     });
+    analytics.boardRenamed();
     setIsRenaming(false);
     router.refresh();
   };
@@ -45,6 +47,7 @@ export function BoardCard({ board }: { board: Board }) {
   const handleDelete = async () => {
     setIsDeleting(true);
     await fetch(`/api/boards/${board.id}`, { method: 'DELETE' });
+    analytics.boardDeleted();
     router.refresh();
   };
 
@@ -55,6 +58,7 @@ export function BoardCard({ board }: { board: Board }) {
     } catch {
       prompt('Copy this link:', url);
     }
+    analytics.boardShared();
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -157,6 +161,7 @@ export function BoardCard({ board }: { board: Board }) {
               <Link
                 href={`/create?boardId=${board.id}`}
                 title="Edit board"
+                onClick={() => analytics.boardEdited()}
                 className="font-sans text-xs font-medium text-sage hover:text-forest transition-colors"
               >
                 Edit

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { analytics } from '@/lib/analytics';
 
 const particles = [
   { size: 10, top: '15%', left: '8%', delay: 0, color: 'bg-gold/30' },
@@ -98,7 +99,7 @@ export function HeroSection() {
             {/* CTA buttons */}
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Button variant="gold" size="lg" className="text-base px-8 animate-pulse-glow" asChild>
-                <Link href="/create">Create Your Dream Board</Link>
+                <Link href="/create" onClick={() => analytics.landingCtaClicked('hero')}>Create Your Dream Board</Link>
               </Button>
               <Button
                 variant="outline"

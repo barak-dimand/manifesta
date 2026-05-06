@@ -6,6 +6,7 @@ import { Quote, Search, Plus, X, Sparkles, Heart, Brain, Rocket, Sun, Star, Penc
 import { Button } from '@/components/ui/button';
 import type { WizardState } from '@/hooks/use-wizard';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/lib/analytics';
 
 interface Step3Props {
   state: WizardState;
@@ -88,8 +89,10 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
     const display = getDisplayText(original);
     if (selectedQuotes.includes(display)) {
       update({ selectedQuotes: selectedQuotes.filter((q) => q !== display) });
+      analytics.quoteToggled('deselected', 'curated');
     } else {
       update({ selectedQuotes: [...selectedQuotes, display] });
+      analytics.quoteToggled('selected', 'curated');
     }
   };
 
@@ -120,6 +123,7 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
     const trimmed = customInput.trim();
     if (trimmed && !customQuotes.includes(trimmed)) {
       update({ customQuotes: [...customQuotes, trimmed] });
+      analytics.quoteToggled('selected', 'custom');
       setCustomInput('');
     }
   };
@@ -144,6 +148,11 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
   };
 
   const totalSelected = selectedQuotes.length + customQuotes.length;
+
+  const handleNext = () => {
+    analytics.step3Completed({ selectedCount: selectedQuotes.length, customCount: customQuotes.length });
+    next();
+  };
 
   return (
     <div className="flex flex-col gap-7">
@@ -363,7 +372,7 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
       </div>
 
       {/* CTA */}
-      <Button variant="gold" size="lg" className="w-full text-base" onClick={next} data-testid="step3-next">
+      <Button variant="gold" size="lg" className="w-full text-base" onClick={handleNext} data-testid="step3-next">
         Next: Your Journey →
       </Button>
     </div>

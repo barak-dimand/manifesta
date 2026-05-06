@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Upload, X, Eye, UserRound } from 'lucide-react';
+import { analytics } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -89,7 +90,11 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
     );
 
     const uploaded = results.filter((u): u is string => u !== null);
-    if (uploaded.length > 0) update({ photos: [...state.photos, ...uploaded] });
+    if (uploaded.length > 0) {
+      const newPhotos = [...state.photos, ...uploaded];
+      update({ photos: newPhotos });
+      analytics.photoUploaded(newPhotos.length);
+    }
 
     if (storageUnavailable) {
       setUploadError('Photo storage is not configured — you can continue without a photo.');
@@ -121,6 +126,15 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
 
   const canAddMore = state.photos.length < MAX_PHOTOS && !uploading;
   const hasPhotos = state.photos.length > 0;
+
+  const handleNext = () => {
+    analytics.step2Completed({
+      style: state.style ?? '',
+      photoCount: state.photos.length,
+      gender: state.gender,
+    });
+    next();
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -255,7 +269,11 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
                 <button
                   key={value}
                   type="button"
-                  onClick={() => update({ gender: state.gender === value ? null : value })}
+                  onClick={() => {
+                    const next = state.gender === value ? null : value;
+                    update({ gender: next });
+                    if (next) analytics.genderSelected(next);
+                  }}
                   className={cn(
                     'flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-sans text-sm font-medium transition-all duration-200',
                     state.gender === value
@@ -285,7 +303,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
                 data-testid={`style-${option.id}`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => update({ style: option.id })}
+                onClick={() => { update({ style: option.id }); analytics.styleSelected(option.id); }}
                 className={cn(
                   'relative rounded-xl overflow-hidden border-2 text-left group transition-all duration-300',
                   selected
@@ -332,7 +350,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
       </div>
 
       {/* CTA */}
-      <Button variant="gold" size="lg" className="w-full text-base" onClick={next} data-testid="step2-next">
+      <Button variant="gold" size="lg" className="w-full text-base" onClick={handleNext} data-testid="step2-next">
         Next: Your Quotes →
       </Button>
 

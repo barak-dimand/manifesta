@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Download, Link2, Trash2, Check } from 'lucide-react';
 import type { GeneratedWallpaper } from '@/lib/db/schema';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/lib/analytics';
 
 export function WallpaperCard({ image }: { image: GeneratedWallpaper }) {
   const router = useRouter();
@@ -24,6 +25,7 @@ export function WallpaperCard({ image }: { image: GeneratedWallpaper }) {
     } catch {
       prompt('Copy image URL:', image.imageUrl);
     }
+    analytics.wallpaperShared();
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -31,6 +33,7 @@ export function WallpaperCard({ image }: { image: GeneratedWallpaper }) {
   const handleDelete = async () => {
     setIsDeleting(true);
     await fetch(`/api/wallpapers/${image.id}`, { method: 'DELETE' });
+    analytics.wallpaperDeleted();
     router.refresh();
   };
 
@@ -59,6 +62,7 @@ export function WallpaperCard({ image }: { image: GeneratedWallpaper }) {
           <a
             href={image.imageUrl}
             download="manifesta-wallpaper.png"
+            onClick={() => analytics.wallpaperDownloaded()}
             className="w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition-colors"
             title="Download wallpaper"
           >
@@ -128,6 +132,7 @@ export function WallpaperCard({ image }: { image: GeneratedWallpaper }) {
                 href={image.imageUrl}
                 download="manifesta-wallpaper.png"
                 title="Download"
+                onClick={() => analytics.wallpaperDownloaded()}
                 className="text-forest/40 hover:text-sage transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />

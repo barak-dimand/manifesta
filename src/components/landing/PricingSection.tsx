@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Check, Sparkles, Star, Headphones, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/lib/analytics';
 
 interface Tier {
   id: string;
@@ -130,7 +131,7 @@ export function PricingSection() {
               ))}
             </div>
             <Button variant="gold" size="lg" className="sm:self-center flex-shrink-0 px-8" asChild>
-              <Link href="/create">Create Mine — Free</Link>
+              <Link href="/create" onClick={() => analytics.landingCtaClicked('pricing')}>Create Mine — Free</Link>
             </Button>
           </div>
         </motion.div>
@@ -209,7 +210,7 @@ export function PricingSection() {
                 size="lg"
                 asChild
               >
-                <Link href="/create">{tier.cta}</Link>
+                <Link href="/create" onClick={() => analytics.landingCtaClicked('pricing')}>{tier.cta}</Link>
               </Button>
             </motion.div>
           ))}
