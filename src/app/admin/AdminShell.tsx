@@ -7,9 +7,11 @@ import { GenerationHistory } from './GenerationHistory';
 import { DbExplorer } from './DbExplorer';
 import { ModelConfig } from './ModelConfig';
 import { AppLogs } from './AppLogs';
+import { VisionBoardUploader } from './VisionBoardUploader';
 import { cn } from '@/lib/utils';
 
 const TABS = [
+  { id: 'boards', label: '✨ Vision Boards' },
   { id: 'lab', label: 'Generation Lab' },
   { id: 'history', label: 'Generation History' },
   { id: 'models', label: 'Model Config' },
@@ -20,7 +22,7 @@ const TABS = [
 type Tab = (typeof TABS)[number]['id'];
 
 export function AdminShell() {
-  const [activeTab, setActiveTab] = useState<Tab>('lab');
+  const [activeTab, setActiveTab] = useState<Tab>('boards');
   const [historyKey, setHistoryKey] = useState(0);
 
   const refreshHistory = useCallback(() => setHistoryKey((k) => k + 1), []);
@@ -60,6 +62,7 @@ export function AdminShell() {
 
       {/* Content */}
       <main className="p-6 max-w-7xl mx-auto">
+        {activeTab === 'boards' && <VisionBoardUploader />}
         {activeTab === 'lab' && <GenerationLab onGenerated={refreshHistory} />}
         {activeTab === 'history' && <GenerationHistory key={historyKey} />}
         {activeTab === 'models' && <ModelConfig />}
