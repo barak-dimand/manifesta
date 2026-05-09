@@ -76,20 +76,23 @@ export async function POST(
       details: { boardId, targetUserId: board.userId, imageUrl },
     });
 
-    // Send email notification (non-blocking — never fail the request)
+    // Send notification email — awaited so it completes before the response is returned.
+    // Wrapped in its own try/catch so an email failure never rolls back the upload.
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://joinmanifesta.com';
-    void sendVisionBoardReady({
-      to: board.email,
-      firstName: null, // board doesn't store firstName; email template handles gracefully
-      imageUrl,
-      dreams: board.dreams,
-      dashboardUrl: `${appUrl}/dashboard`,
-    }).catch((err) => {
-      void logger.warn('Vision board ready email failed', {
-        route: ROUTE,
-        details: serializeError(err),
+    try {
+      await sendVisionBoardReady({
+        to: board.email,
+        firstName: null,
+        imageUrl,
+        dreams: board.dreams,
+        dashboardUrl: `${appUrl}/dashboard`,
       });
-    });
+    } catch (emailErr) {
+      await logger.warn('Vision board ready email failed', {
+        route: ROUTE,
+        details: serializeError(emailErr),
+      });
+    }
 
     return NextResponse.json({ success: true, imageUrl });
   } catch (err) {
