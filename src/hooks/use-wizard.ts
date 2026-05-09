@@ -23,6 +23,8 @@ export interface WizardState {
   selectedOffers: string[]; // which offer tiers the user selected
   selectedQuotes: string[]; // curated quotes chosen in step 3
   customQuotes: string[]; // user-written quotes / affirmations
+  quoteEdits: Record<string, string>; // original text → edited text for curated quotes
+  dreamPriorities: Record<string, { want: number; believe: number }>; // dream text → priority scores
   gender: 'male' | 'female' | 'prefer_not_to_say' | null;
 }
 
@@ -41,6 +43,8 @@ const initialState: WizardState = {
   selectedOffers: ['wallpaper'],
   selectedQuotes: [],
   customQuotes: [],
+  quoteEdits: {},
+  dreamPriorities: {},
   gender: null,
 };
 

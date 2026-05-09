@@ -19,6 +19,7 @@ import { DreamExplorer } from './DreamExplorer';
 import type { WizardState, SerializablePromptState } from '@/hooks/use-wizard';
 import type { LifeArea } from '@/lib/validations/wizard';
 import { cn } from '@/lib/utils';
+import { analytics } from '@/lib/analytics';
 
 interface Step1Props {
   state: WizardState;
@@ -60,6 +61,14 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
       return;
     }
     setDreamsError('');
+    analytics.step1Completed({
+      areas: state.selectedAreas,
+      dreamWordCount: state.dreams.trim().split(/\s+/).length,
+      usedExplorer: (state.explorerPromptStates?.length ?? 0) > 0,
+      explorerAnswersCount: (state.explorerPromptStates ?? []).filter(
+        (s) => s.selectedIndices.length > 0 || s.customText.trim().length > 0,
+      ).length,
+    });
     next();
   };
 
@@ -70,6 +79,10 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
 
   const handleExplorerStateChange = (states: SerializablePromptState[]) => {
     update({ explorerPromptStates: states });
+  };
+
+  const handlePrioritiesChange = (priorities: Record<string, { want: number; believe: number }>) => {
+    update({ dreamPriorities: priorities });
   };
 
   const isValid = state.selectedAreas.length > 0 && state.dreams.length >= MIN_DREAMS;
@@ -162,6 +175,8 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
                 onComplete={handleExplorerComplete}
                 initialPromptStates={state.explorerPromptStates}
                 onStateChange={handleExplorerStateChange}
+                initialPriorities={state.dreamPriorities}
+                onPrioritiesChange={handlePrioritiesChange}
               />
             </motion.div>
           ) : (

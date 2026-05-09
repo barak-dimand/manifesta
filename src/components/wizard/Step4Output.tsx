@@ -132,7 +132,10 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
         manifesto: state.manifesto || undefined,
         enableTimeline: state.enableTimeline,
         photoUrls: state.photos.filter((p) => p.startsWith('http')),
-        explorerData: state.explorerPromptStates,
+        explorerData: {
+          promptStates: state.explorerPromptStates,
+          priorities: Object.keys(state.dreamPriorities ?? {}).length ? state.dreamPriorities : undefined,
+        },
         selectedOffers: state.selectedOffers?.length ? state.selectedOffers : ['wallpaper'],
         selectedQuotes: state.selectedQuotes,
         customQuotes: state.customQuotes,

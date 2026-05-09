@@ -51,8 +51,6 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [customInput, setCustomInput] = useState('');
-  // originalText -> editedText for curated quotes the user has tweaked
-  const [edits, setEdits] = useState<Record<string, string>>({});
   // which curated quote is currently being edited (by original text key)
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState('');
@@ -72,8 +70,9 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
 
   const selectedQuotes = state.selectedQuotes ?? [];
   const customQuotes = state.customQuotes ?? [];
+  const quoteEdits = state.quoteEdits ?? {};
 
-  const getDisplayText = (original: string) => edits[original] ?? original;
+  const getDisplayText = (original: string) => quoteEdits[original] ?? original;
 
   const filteredQuotes = CURATED_QUOTES.filter((q) => {
     const matchesCategory = activeCategory === 'all' || q.category === activeCategory;
@@ -106,16 +105,18 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
     const trimmed = editDraft.trim();
     if (!trimmed) { setEditingKey(null); return; }
     const prevDisplay = getDisplayText(original);
-    // Update edits map
+    // Persist edits map in wizard state so it survives step navigation
+    const newEdits = { ...quoteEdits };
     if (trimmed !== original) {
-      setEdits((prev) => ({ ...prev, [original]: trimmed }));
+      newEdits[original] = trimmed;
     } else {
-      setEdits((prev) => { const n = { ...prev }; delete n[original]; return n; });
+      delete newEdits[original];
     }
     // Update selectedQuotes if this quote was already selected
-    if (selectedQuotes.includes(prevDisplay)) {
-      update({ selectedQuotes: selectedQuotes.map((q) => q === prevDisplay ? trimmed : q) });
-    }
+    const newSelected = selectedQuotes.includes(prevDisplay)
+      ? selectedQuotes.map((q) => q === prevDisplay ? trimmed : q)
+      : selectedQuotes;
+    update({ quoteEdits: newEdits, selectedQuotes: newSelected });
     setEditingKey(null);
   };
 
@@ -218,7 +219,7 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
           {filteredQuotes.map((q) => {
             const display = getDisplayText(q.text);
             const isSelected = selectedQuotes.includes(display);
-            const isEdited = !!edits[q.text];
+            const isEdited = !!quoteEdits[q.text];
             const isEditing = editingKey === q.text;
 
             return (

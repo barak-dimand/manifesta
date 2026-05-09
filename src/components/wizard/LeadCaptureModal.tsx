@@ -60,6 +60,9 @@ export function LeadCaptureModal({
             enableTimeline: wizardData.enableTimeline,
             photoCount: wizardData.photos.length,
             photoUrls: wizardData.photos.filter((p) => p.startsWith('http')),
+            dreamPriorities: Object.keys(wizardData.dreamPriorities ?? {}).length
+              ? wizardData.dreamPriorities
+              : undefined,
           },
         }),
       });

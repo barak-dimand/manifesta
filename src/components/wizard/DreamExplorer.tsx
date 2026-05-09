@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Wand2, ArrowRight, Lightbulb, Plus, Pencil } from 'lucide-react';
+import { Wand2, ArrowRight, Lightbulb, Plus, Pencil, Heart, Target, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SerializablePromptState } from '@/hooks/use-wizard';
 
@@ -91,13 +91,17 @@ type PromptState = {
   customText: string;
 };
 
+type Priority = { want: number; believe: number };
+
 interface DreamExplorerProps {
   onComplete: (combinedDream: string) => void;
   initialPromptStates?: SerializablePromptState[] | null;
   onStateChange?: (states: SerializablePromptState[]) => void;
+  initialPriorities?: Record<string, Priority>;
+  onPrioritiesChange?: (priorities: Record<string, Priority>) => void;
 }
 
-export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }: DreamExplorerProps) {
+export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, initialPriorities, onPrioritiesChange }: DreamExplorerProps) {
   const [currentPrompt, setCurrentPrompt] = useState(0);
   const [promptStates, setPromptStates] = useState<PromptState[]>(() =>
     EXPLORATION_PROMPTS.map((_, i) => {
@@ -110,9 +114,10 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
       };
     })
   );
-  // Track editing as [promptIndex, suggestionIndex] so it auto-clears on prompt change
   const [editing, setEditing] = useState<[number, number] | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
+  const [isPrioritizing, setIsPrioritizing] = useState(false);
+  const [priorities, setPriorities] = useState<Record<string, Priority>>(initialPriorities ?? {});
 
   useEffect(() => {
     if (editing !== null && editInputRef.current) {
@@ -120,7 +125,6 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
     }
   }, [editing]);
 
-  // Sync selections back to wizard state so they survive navigation
   const onStateChangeRef = useRef(onStateChange);
   useEffect(() => { onStateChangeRef.current = onStateChange; });
   useEffect(() => {
@@ -132,6 +136,12 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
       })),
     );
   }, [promptStates]);
+
+  const onPrioritiesChangeRef = useRef(onPrioritiesChange);
+  useEffect(() => { onPrioritiesChangeRef.current = onPrioritiesChange; });
+  useEffect(() => {
+    onPrioritiesChangeRef.current?.(priorities);
+  }, [priorities]);
 
   const editingIndex = editing?.[0] === currentPrompt ? editing[1] : null;
 
@@ -184,21 +194,55 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
     }
   };
 
-  const handleFinish = () => {
-    const parts: string[] = [];
+  // Build flat ordered list of all selected items across all prompts
+  const getAllItems = (): { text: string }[] => {
+    const items: { text: string }[] = [];
     for (let i = 0; i < EXPLORATION_PROMPTS.length; i++) {
       const ps = promptStates[i];
       const p = EXPLORATION_PROMPTS[i];
-      const picked = Array.from(ps.selectedIndices).map(
-        (idx) => ps.edits[idx] ?? p.suggestions[idx]
-      );
-      const custom = ps.customText.trim();
-      const combined = [...picked, ...(custom ? [custom] : [])];
-      if (combined.length > 0) {
-        parts.push(combined.join('. '));
+      for (const idx of Array.from(ps.selectedIndices).sort((a, b) => a - b)) {
+        items.push({ text: ps.edits[idx] ?? p.suggestions[idx] });
       }
+      const custom = ps.customText.trim();
+      if (custom) items.push({ text: custom });
     }
-    onComplete(parts.join('. ') + '.');
+    return items;
+  };
+
+  // Direct complete — used by Skip actions only
+  const handleFinish = () => {
+    const items = getAllItems();
+    const combined = items.map((i) => i.text).join('. ');
+    onComplete(combined ? combined + '.' : '');
+  };
+
+  // Enter the prioritize screen, initialising missing priorities to 5
+  const enterPrioritize = () => {
+    const items = getAllItems();
+    setPriorities((prev) => {
+      const next = { ...prev };
+      for (const item of items) {
+        if (!next[item.text]) next[item.text] = { want: 5, believe: 5 };
+      }
+      return next;
+    });
+    setIsPrioritizing(true);
+  };
+
+  // Sort by combined score and complete — output includes priority scores for the textarea and AI context
+  const handleSortAndComplete = () => {
+    const items = getAllItems();
+    const sorted = [...items].sort((a, b) => {
+      const sa = (priorities[a.text]?.want ?? 5) + (priorities[a.text]?.believe ?? 5);
+      const sb = (priorities[b.text]?.want ?? 5) + (priorities[b.text]?.believe ?? 5);
+      return sb - sa;
+    });
+    const lines = sorted.map((item, i) => {
+      const p = priorities[item.text];
+      const score = p ? ` (want ${p.want}/10, believe ${p.believe}/10)` : '';
+      return `${i + 1}. ${item.text}${score}`;
+    });
+    onComplete(lines.join('\n'));
   };
 
   const totalAnswered = promptStates.filter(
@@ -213,6 +257,141 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
       handleFinish();
     }
   };
+
+  // ── Prioritize screen ──────────────────────────────────────────────────────
+
+  if (isPrioritizing) {
+    const allItems = getAllItems();
+
+    // Compute rank of each item based on current slider values (updates live)
+    const sorted = [...allItems].sort((a, b) => {
+      const sa = (priorities[a.text]?.want ?? 5) + (priorities[a.text]?.believe ?? 5);
+      const sb = (priorities[b.text]?.want ?? 5) + (priorities[b.text]?.believe ?? 5);
+      return sb - sa;
+    });
+    const rankOf = Object.fromEntries(sorted.map((item, i) => [item.text, i + 1]));
+
+    const setPriority = (text: string, key: keyof Priority, val: number) => {
+      setPriorities((prev) => ({
+        ...prev,
+        [text]: { ...(prev[text] ?? { want: 5, believe: 5 }), [key]: val },
+      }));
+    };
+
+    return (
+      <div className="space-y-5 rounded-2xl border-2 border-sage/20 bg-sage-light/30 p-5">
+        {/* Header */}
+        <div className="flex items-center gap-2 text-sage">
+          <Sparkles className="h-4 w-4" />
+          <span className="font-sans text-sm font-semibold">Prioritize Your Dreams</span>
+        </div>
+
+        {/* Title */}
+        <div>
+          <h3 className="font-display text-xl font-semibold text-forest leading-snug mb-1">
+            How much do you want each one — and how much do you believe you can have it?
+          </h3>
+          <p className="font-sans text-xs text-forest/50">
+            Slide from 1 to 10. We&apos;ll sort your manifesto so what you want most and believe in most rises to the top.
+          </p>
+        </div>
+
+        {/* Items */}
+        <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1">
+          {allItems.map((item) => {
+            const rank = rankOf[item.text];
+            const want = priorities[item.text]?.want ?? 5;
+            const believe = priorities[item.text]?.believe ?? 5;
+            const wantPct = ((want - 1) / 9) * 100;
+            const believePct = ((believe - 1) / 9) * 100;
+
+            return (
+              <motion.div
+                key={item.text}
+                layout
+                className="bg-white/70 rounded-xl border border-sage/15 p-4 space-y-3"
+              >
+                {/* Item header */}
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-sage flex items-center justify-center flex-shrink-0 mt-0.5 transition-all duration-300">
+                    <span className="font-sans text-xs font-bold text-white">{rank}</span>
+                  </div>
+                  <p className="font-sans text-sm text-forest font-medium leading-snug">{item.text}</p>
+                </div>
+
+                {/* Sliders — side by side */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                  {/* Want */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1 font-sans text-[11px] text-forest/50">
+                        <Heart className="h-2.5 w-2.5" />
+                        How much I want it
+                      </span>
+                      <span className="font-sans text-xs font-semibold text-forest/70 ml-1">{want}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={want}
+                      onChange={(e) => setPriority(item.text, 'want', Number(e.target.value))}
+                      className="dream-slider w-full"
+                      style={{
+                        background: `linear-gradient(to right, var(--color-sage) ${wantPct}%, hsl(150,18%,82%) ${wantPct}%)`,
+                      }}
+                    />
+                  </div>
+
+                  {/* Believe */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1 font-sans text-[11px] text-forest/50">
+                        <Target className="h-2.5 w-2.5" />
+                        How much I believe it
+                      </span>
+                      <span className="font-sans text-xs font-semibold text-forest/70 ml-1">{believe}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={believe}
+                      onChange={(e) => setPriority(item.text, 'believe', Number(e.target.value))}
+                      className="dream-slider w-full"
+                      style={{
+                        background: `linear-gradient(to right, var(--color-sage) ${believePct}%, hsl(150,18%,82%) ${believePct}%)`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between pt-1">
+          <button
+            onClick={() => setIsPrioritizing(false)}
+            className="font-sans text-sm text-forest/50 hover:text-forest transition-colors"
+          >
+            ← Back to prompts
+          </button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleSortAndComplete}
+            data-testid="explorer-sort-complete"
+          >
+            Sort &amp; Complete ✨
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Normal prompt screen ───────────────────────────────────────────────────
 
   return (
     <div className="space-y-5 rounded-2xl border-2 border-sage/20 bg-sage-light/30 p-5">
@@ -310,7 +489,6 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
                   );
                 }
 
-                // Use div+role so we can nest the pencil button without invalid HTML
                 return (
                   <motion.div
                     key={idx}
@@ -376,7 +554,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
         </button>
 
         <div className="flex items-center gap-2">
-          {/* Skip — always available */}
+          {/* Skip — bypasses prioritize */}
           <button
             onClick={handleSkip}
             className="font-sans text-sm text-forest/40 hover:text-forest/70 transition-colors"
@@ -384,12 +562,12 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
             {isLast ? 'Skip & finish' : 'Skip →'}
           </button>
 
-          {/* Use answers — available as soon as at least 1 is answered */}
+          {/* Prioritize — available as soon as at least 1 prompt is answered */}
           {totalAnswered >= 1 && (
             <Button
               variant="outline"
               size="sm"
-              onClick={handleFinish}
+              onClick={enterPrioritize}
               className="text-xs"
             >
               Use {totalAnswered} answer{totalAnswered === 1 ? '' : 's'} ✨
@@ -410,16 +588,16 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange }
             </Button>
           )}
 
-          {/* Complete on last prompt */}
+          {/* Complete on last prompt — goes to prioritize if answers exist */}
           {isLast && (
             <Button
               variant="default"
               size="sm"
-              onClick={handleFinish}
+              onClick={totalAnswered > 0 ? enterPrioritize : handleFinish}
               className="text-xs"
               data-testid="explorer-complete"
             >
-              {totalAnswered > 0 ? `Use ${totalAnswered} answer${totalAnswered === 1 ? '' : 's'} ✨` : 'Finish'}
+              {totalAnswered > 0 ? `Prioritize ${totalAnswered} answer${totalAnswered === 1 ? '' : 's'} ✨` : 'Finish'}
             </Button>
           )}
         </div>
