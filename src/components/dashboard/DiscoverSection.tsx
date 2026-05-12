@@ -207,7 +207,7 @@ export function DiscoverSection({ board }: Props) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18 }}
-          className="rounded-2xl border border-white/40 bg-white/70 backdrop-blur-md p-5 flex flex-col gap-4"
+          className="rounded-2xl border border-sage/15 bg-white/80 p-5 flex flex-col gap-4"
         >
           <p className="font-display text-base font-semibold text-forest leading-snug">
             {prompt.question}
@@ -247,7 +247,7 @@ export function DiscoverSection({ board }: Props) {
 
       {/* Unexplored areas nudge */}
       {board.selectedAreas.length < 6 && (
-        <div className="rounded-xl border border-white/30 bg-white/60 backdrop-blur-md px-4 py-3 flex items-center gap-3">
+        <div className="rounded-xl border border-gold/20 bg-gold/5 px-4 py-3 flex items-center gap-3">
           <Sparkles className="w-4 h-4 text-gold/60 flex-shrink-0" />
           <div className="flex-1">
             <p className="font-sans text-xs text-forest/70 font-medium">

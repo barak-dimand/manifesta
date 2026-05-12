@@ -150,7 +150,7 @@ export function ManifestoCard({ board, isPaid }: Props) {
   const allQuotes = [...selectedQuotes, ...customQuotes];
 
   return (
-    <div className="rounded-2xl border border-white/40 bg-white/80 backdrop-blur-md shadow-lg overflow-hidden">
+    <div className="rounded-2xl border border-sage/20 bg-white/90 shadow-sm overflow-hidden">
       {/* Card header */}
       <div className="flex items-start justify-between px-6 pt-5 pb-0">
         <div>
