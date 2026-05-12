@@ -177,6 +177,7 @@ export function Step1DreamLife({ state, update, next }: Step1Props) {
                 onStateChange={handleExplorerStateChange}
                 initialPriorities={state.dreamPriorities}
                 onPrioritiesChange={handlePrioritiesChange}
+                skipPrioritize
               />
             </motion.div>
           ) : (

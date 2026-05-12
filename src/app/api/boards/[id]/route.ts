@@ -12,8 +12,18 @@ const ROUTE = '/api/boards/[id]';
 const PatchBoardSchema = z.object({
   wallpaperUrl: z.string().url().optional(),
   name: z.string().max(100).optional(),
-}).refine((d) => d.wallpaperUrl !== undefined || d.name !== undefined, {
-  message: 'At least one of wallpaperUrl or name is required',
+  selectedOffers: z.array(z.string()).optional(),
+  goals: z.array(GoalSchema).optional(),
+  enableTimeline: z.boolean().optional(),
+  explorerData: z.unknown().optional(),
+}).refine((d) =>
+  d.wallpaperUrl !== undefined ||
+  d.name !== undefined ||
+  d.selectedOffers !== undefined ||
+  d.goals !== undefined ||
+  d.enableTimeline !== undefined ||
+  d.explorerData !== undefined, {
+  message: 'At least one field is required',
 });
 
 const PutBoardSchema = z.object({
@@ -122,6 +132,10 @@ export async function PATCH(
     const update: Record<string, unknown> = { updatedAt: new Date() };
     if (parsed.data.wallpaperUrl !== undefined) update.wallpaperUrl = parsed.data.wallpaperUrl;
     if (parsed.data.name !== undefined) update.name = parsed.data.name || null;
+    if (parsed.data.selectedOffers !== undefined) update.selectedOffers = parsed.data.selectedOffers;
+    if (parsed.data.goals !== undefined) update.goals = parsed.data.goals;
+    if (parsed.data.enableTimeline !== undefined) update.enableTimeline = parsed.data.enableTimeline;
+    if (parsed.data.explorerData !== undefined) update.explorerData = parsed.data.explorerData;
 
     const [board] = await getDb()
       .update(boards)

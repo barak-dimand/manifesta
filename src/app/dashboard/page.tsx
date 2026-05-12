@@ -3,15 +3,16 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getDb } from '@/lib/db';
 import { boards, generatedWallpapers } from '@/lib/db/schema';
-import { eq, desc, gte, and, count } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import type { Board, GeneratedWallpaper } from '@/lib/db/schema';
-import { cn } from '@/lib/utils';
-import { BoardCard } from '@/components/dashboard/BoardCard';
+import { DreamBoardHero } from '@/components/dashboard/DreamBoardHero';
+import { DeepenYourVision } from '@/components/dashboard/DeepenYourVision';
+import { DreamVideos } from '@/components/dashboard/DreamVideos';
 import { WallpaperCard } from '@/components/dashboard/WallpaperCard';
+import { BoardCard } from '@/components/dashboard/BoardCard';
+import { Sparkles, Plus } from 'lucide-react';
 
 export const metadata = { title: 'Dashboard — Manifesta' };
-
-const DAILY_LIMIT = 15;
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -19,10 +20,8 @@ export default async function DashboardPage() {
 
   let userBoards: Board[] = [];
   let userImages: GeneratedWallpaper[] = [];
-  let usedToday = 0;
 
   try {
-    const since = new Date(Date.now() - 86_400_000);
     [userBoards, userImages] = await Promise.all([
       getDb()
         .select()
@@ -36,63 +35,52 @@ export default async function DashboardPage() {
         .orderBy(desc(generatedWallpapers.createdAt))
         .limit(50),
     ]);
-
-    const [row] = await getDb()
-      .select({ value: count() })
-      .from(generatedWallpapers)
-      .where(and(eq(generatedWallpapers.userId, userId), gte(generatedWallpapers.createdAt, since)));
-    usedToday = row?.value ?? 0;
   } catch {
     // DB unavailable in local dev without env
   }
 
-  const remaining = Math.max(0, DAILY_LIMIT - usedToday);
+  const featuredBoard = userBoards[0] ?? null;
+  const otherBoards = userBoards.slice(1);
 
   return (
     <div className="min-h-screen bg-cream">
       <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur-md border-b border-sage/10 px-4 py-3">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="font-display text-base font-semibold text-forest tracking-wide hover:text-sage transition-colors">
-            Manifesta
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-1.5 group">
+            <Sparkles className="w-4 h-4 text-gold transition-transform group-hover:scale-110" />
+            <span className="font-display text-base font-semibold text-forest tracking-wide">Manifesta</span>
           </Link>
-          <Link href="/create?new=1" className="font-sans text-sm font-semibold text-sage hover:text-forest transition-colors">
-            + New Board
+          <Link
+            href="/create?new=1"
+            className="flex items-center gap-1.5 font-sans text-sm font-semibold text-sage hover:text-forest transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New Board
           </Link>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-10 space-y-14">
+      <main id="main-content" className="max-w-2xl mx-auto px-4 py-10 space-y-14">
 
-        {/* ── Wallpapers ─────────────────────────────────────────────────── */}
+        {/* ── Featured Dream Board ──────────────────────────────────── */}
         <section>
-          <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
-            <div>
-              <h1 className="font-display text-3xl font-semibold text-forest">Your Wallpapers</h1>
-              <p className="font-sans text-forest/55 text-sm mt-1">
-                {userImages.length === 0
-                  ? 'No wallpapers yet — your first one is on its way'
-                  : `${userImages.length} wallpaper${userImages.length === 1 ? '' : 's'} saved`}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 rounded-xl border border-sage/20 bg-white/60 px-4 py-2">
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(DAILY_LIMIT, 5) }).map((_, i) => (
-                  <div key={i} className={cn('w-2.5 h-2.5 rounded-full', i < Math.min(usedToday, 5) ? 'bg-sage' : 'bg-sage/20')} />
-                ))}
-              </div>
-              <span className="font-sans text-xs text-forest/60">
-                {remaining > 0
-                  ? `${remaining} generation${remaining === 1 ? '' : 's'} left today`
-                  : 'Daily limit reached — resets tomorrow'}
-              </span>
-            </div>
+          <div className="mb-6">
+            <h1 className="font-display text-3xl font-semibold text-forest">Your Dream Board</h1>
+            <p className="font-sans text-forest/55 text-sm mt-1">
+              {featuredBoard
+                ? 'Your vision, always within reach.'
+                : 'Create your first dream board to get started.'}
+            </p>
           </div>
 
-          {userImages.length === 0 ? (
+          {featuredBoard ? (
+            <DreamBoardHero board={featuredBoard} />
+          ) : (
             <div className="rounded-2xl border-2 border-dashed border-sage/20 p-12 text-center">
-              <p className="font-display text-xl text-forest/50 mb-2">No wallpapers yet</p>
+              <Sparkles className="w-10 h-10 text-gold/50 mx-auto mb-3" />
+              <p className="font-display text-xl text-forest/50 mb-2">No dream board yet</p>
               <p className="font-sans text-sm text-forest/40 mb-6">
-                Your dream board wallpaper will appear here once it&apos;s crafted and delivered
+                Complete the wizard to create your personalized vision board.
               </p>
               <Link
                 href="/create?new=1"
@@ -101,47 +89,55 @@ export default async function DashboardPage() {
                 Create My Dream Board
               </Link>
             </div>
-          ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          )}
+        </section>
+
+        {/* ── Deepen Your Vision ────────────────────────────────────── */}
+        {featuredBoard && (
+          <section>
+            <DeepenYourVision board={featuredBoard} />
+          </section>
+        )}
+
+        {/* ── Dream Videos ──────────────────────────────────────────── */}
+        {featuredBoard && (
+          <section>
+            <DreamVideos boardId={featuredBoard.id} />
+          </section>
+        )}
+
+        {/* ── Wallpapers ────────────────────────────────────────────── */}
+        {userImages.length > 0 && (
+          <section>
+            <div className="mb-6">
+              <h2 className="font-display text-2xl font-semibold text-forest">Your Wallpapers</h2>
+              <p className="font-sans text-forest/55 text-sm mt-1">
+                {userImages.length} wallpaper{userImages.length === 1 ? '' : 's'} saved
+              </p>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
               {userImages.map((img) => (
                 <WallpaperCard key={img.id} image={img} />
               ))}
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
-        {/* ── Dream Boards ──────────────────────────────────────────────── */}
-        <section>
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <h2 className="font-display text-2xl font-semibold text-forest">Dream Boards</h2>
+        {/* ── Other Boards ──────────────────────────────────────────── */}
+        {otherBoards.length > 0 && (
+          <section>
+            <div className="mb-6">
+              <h2 className="font-display text-2xl font-semibold text-forest">Past Boards</h2>
               <p className="font-sans text-forest/55 text-sm mt-1">
-                {userBoards.length === 0
-                  ? 'No boards yet'
-                  : `${userBoards.length} board${userBoards.length === 1 ? '' : 's'}`}
+                {otherBoards.length} previous board{otherBoards.length === 1 ? '' : 's'}
               </p>
             </div>
-          </div>
-
-          {userBoards.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-sage/20 p-12 text-center">
-              <p className="font-display text-xl text-forest/50 mb-2">Nothing here yet</p>
-              <p className="font-sans text-sm text-forest/40 mb-6">
-                Complete the wizard to create your first dream board
-              </p>
-              <Link
-                href="/create?new=1"
-                className="inline-flex items-center gap-2 bg-gold text-forest font-sans text-sm font-semibold px-6 py-3 rounded-xl hover:bg-gold/90 transition-colors"
-              >
-                Create My Dream Board
-              </Link>
-            </div>
-          ) : (
             <div className="grid gap-5 sm:grid-cols-2">
-              {userBoards.map((board) => <BoardCard key={board.id} board={board} />)}
+              {otherBoards.map((board) => <BoardCard key={board.id} board={board} />)}
             </div>
-          )}
-        </section>
+          </section>
+        )}
+
       </main>
     </div>
   );
