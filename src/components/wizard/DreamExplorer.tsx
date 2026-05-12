@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Wand2, ArrowRight, Lightbulb, Plus, Pencil, Heart, Target, Sparkles } from 'lucide-react';
+import { Wand2, ArrowRight, Lightbulb, Plus, Pencil, Heart, Target, Sparkles, MousePointerClick } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SerializablePromptState } from '@/hooks/use-wizard';
 
@@ -118,6 +118,8 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
   const editInputRef = useRef<HTMLInputElement>(null);
   const [isPrioritizing, setIsPrioritizing] = useState(false);
   const [priorities, setPriorities] = useState<Record<string, Priority>>(initialPriorities ?? {});
+  const [showScrollHint, setShowScrollHint] = useState(false);
+  const prioritizeListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (editing !== null && editInputRef.current) {
@@ -227,7 +229,17 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
       return next;
     });
     setIsPrioritizing(true);
+    setShowScrollHint(true);
   };
+
+  // Hide scroll hint on first scroll of the prioritize list
+  useEffect(() => {
+    const el = prioritizeListRef.current;
+    if (!isPrioritizing || !el) return;
+    const onScroll = () => setShowScrollHint(false);
+    el.addEventListener('scroll', onScroll, { passive: true, once: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [isPrioritizing]);
 
   // Sort by combined score and complete — output includes priority scores for the textarea and AI context
   const handleSortAndComplete = () => {
@@ -296,8 +308,9 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
           </p>
         </div>
 
-        {/* Items */}
-        <div className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1">
+        {/* Items — scrollable with fade hint */}
+        <div className="relative">
+          <div ref={prioritizeListRef} className="flex flex-col gap-3 max-h-[420px] overflow-y-auto pr-1">
           {allItems.map((item) => {
             const rank = rankOf[item.text];
             const want = priorities[item.text]?.want ?? 5;
@@ -368,7 +381,17 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
               </motion.div>
             );
           })}
+          </div>
+          {/* Bottom fade gradient to hint at scrollability */}
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[hsl(150,20%,93%)] to-transparent" />
         </div>
+
+        {/* Scroll hint */}
+        {showScrollHint && allItems.length > 3 && (
+          <p className="text-center font-sans text-[11px] text-forest/40 animate-bounce">
+            scroll to rate all ↓
+          </p>
+        )}
 
         {/* Navigation */}
         <div className="flex items-center justify-between pt-1">
@@ -450,8 +473,9 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
 
           {/* Suggestion chips */}
           <div className="space-y-2">
-            <p className="font-sans text-xs text-forest/50 font-medium">
-              Tap to select · tap again to deselect:
+            <p className="font-sans text-xs text-forest/60 font-semibold flex items-center gap-1.5">
+              <MousePointerClick className="h-3.5 w-3.5 text-sage flex-shrink-0" />
+              Tap to select, tap again to remove. Selected items are editable.
             </p>
             <div className="flex flex-wrap gap-2" data-testid="explorer-suggestions">
               {prompt.suggestions.map((_, idx) => {
@@ -498,7 +522,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
                     onClick={() => toggleSuggestion(idx)}
                     onKeyDown={(e) => e.key === 'Enter' && toggleSuggestion(idx)}
                     className={cn(
-                      'rounded-full px-3.5 py-2 font-sans text-xs transition-all duration-200 border flex items-center gap-1.5 cursor-pointer select-none',
+                      'group rounded-full px-3.5 py-2 font-sans text-xs transition-all duration-200 border flex items-center gap-1.5 cursor-pointer select-none',
                       isSelected
                         ? 'bg-sage text-white border-sage shadow-sm'
                         : 'bg-cream text-forest border-sage/20 hover:border-sage/50 hover:bg-sage-light/60'
@@ -508,7 +532,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
                     {isEdited && (
                       <span className="text-[9px] opacity-60">(edited)</span>
                     )}
-                    {isSelected && (
+                    {isSelected ? (
                       <button
                         type="button"
                         onClick={(e) => {
@@ -520,6 +544,8 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
                       >
                         <Pencil className="h-2.5 w-2.5" />
                       </button>
+                    ) : (
+                      <Pencil className="h-2.5 w-2.5 opacity-0 group-hover:opacity-30 transition-opacity ml-0.5 flex-shrink-0" />
                     )}
                   </motion.div>
                 );
