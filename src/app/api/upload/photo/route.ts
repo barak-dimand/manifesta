@@ -1,22 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
-import sharp from 'sharp';
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
+import { NextResponse } from 'next/server';
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
-
-// Formats that need conversion to JPEG for Replicate compatibility
-const NEEDS_CONVERSION = new Set([
+const ALLOWED_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
   'image/heic',
   'image/heif',
   'image/avif',
-  'image/tiff',
-  'image/bmp',
-  'image/x-bmp',
-  'image/gif',
   'image/webp',
-]);
+  'image/gif',
+  'image/bmp',
+  'image/tiff',
+];
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request): Promise<NextResponse> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json(
       { error: 'Photo storage not configured. Add BLOB_READ_WRITE_TOKEN to your environment.' },
@@ -24,52 +22,42 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let formData: FormData;
-  try {
-    formData = await request.formData();
-  } catch {
-    return NextResponse.json({ error: 'Invalid form data' }, { status: 400 });
-  }
-
-  const file = formData.get('file');
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-  }
-
-  if (!file.type.startsWith('image/')) {
-    return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
-  }
-
-  if (file.size > MAX_SIZE_BYTES) {
-    return NextResponse.json({ error: 'File too large (max 10 MB)' }, { status: 400 });
-  }
+  const body = (await request.json()) as HandleUploadBody;
 
   try {
-    const inputBuffer = Buffer.from(await file.arrayBuffer());
-    const uniqueId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async (pathname) => {
+        // Derive type from extension since pathname is the filename
+        const ext = pathname.split('.').pop()?.toLowerCase() ?? '';
+        const typeMap: Record<string, string> = {
+          jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+          heic: 'image/heic', heif: 'image/heif', avif: 'image/avif',
+          webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp', tiff: 'image/tiff',
+        };
+        const detectedType = typeMap[ext];
+        if (detectedType && !ALLOWED_TYPES.includes(detectedType)) {
+          throw new Error('File type not allowed');
+        }
+        return {
+          allowedContentTypes: ALLOWED_TYPES,
+          maximumSizeInBytes: 10 * 1024 * 1024, // 10 MB — enforced by Blob, not the function
+          addRandomSuffix: true,
+          tokenPayload: JSON.stringify({ folder: 'wizard-photos' }),
+        };
+      },
+      onUploadCompleted: async ({ blob }) => {
+        // File is now in Blob storage — no further action needed here
+        console.log('Photo uploaded to blob:', blob.pathname);
+      },
+    });
 
-    let uploadBuffer: Buffer;
-    let filename: string;
-    let contentType: string;
-
-    if (NEEDS_CONVERSION.has(file.type) || file.name.toLowerCase().match(/\.(heic|heif|avif|tiff?|bmp|gif|webp)$/)) {
-      // Convert to JPEG for universal compatibility (Replicate, browsers, display)
-      uploadBuffer = await sharp(inputBuffer).rotate().jpeg({ quality: 90 }).toBuffer();
-      filename = `wizard-photos/${uniqueId}.jpg`;
-      contentType = 'image/jpeg';
-    } else {
-      // JPEG and PNG pass through — already Replicate-compatible
-      uploadBuffer = inputBuffer;
-      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-      filename = `wizard-photos/${uniqueId}.${ext}`;
-      contentType = file.type || 'image/jpeg';
-    }
-
-    const blob = await put(filename, uploadBuffer, { access: 'public', contentType });
-    return NextResponse.json({ url: blob.url });
-  } catch (err) {
-    const detail = err instanceof Error ? err.message : String(err);
-    console.error('Blob upload failed:', detail);
-    return NextResponse.json({ error: 'Upload failed', detail }, { status: 500 });
+    return NextResponse.json(jsonResponse);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Upload failed' },
+      { status: 400 },
+    );
   }
 }

@@ -1,11 +1,19 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Upload, X, Eye, UserRound } from 'lucide-react';
+import { Upload, X, Eye, UserRound, ShieldCheck } from 'lucide-react';
+import { upload } from '@vercel/blob/client';
 import { analytics } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import type { WizardState } from '@/hooks/use-wizard';
 import type { AestheticStyle } from '@/lib/validations/wizard';
 import { cn } from '@/lib/utils';
@@ -64,6 +72,8 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [hasConsented, setHasConsented] = useState(false);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
 
   const uploadFiles = async (files: File[]) => {
     const remaining = MAX_PHOTOS - state.photos.length;
@@ -72,18 +82,19 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
     setUploading(true);
     setUploadError(null);
 
-    let storageUnavailable = false;
     const results = await Promise.all(
       toUpload.map(async (file) => {
-        const fd = new FormData();
-        fd.append('file', file);
         try {
-          const res = await fetch('/api/upload/photo', { method: 'POST', body: fd });
-          if (res.status === 503) { storageUnavailable = true; return null; }
-          if (!res.ok) return null;
-          const data = await res.json() as { url?: string };
-          return data.url ?? null;
-        } catch {
+          const blob = await upload(file.name, file, {
+            access: 'public',
+            handleUploadUrl: '/api/upload/photo',
+          });
+          return blob.url;
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : '';
+          if (msg.includes('503') || msg.includes('not configured')) {
+            setUploadError('Photo storage is not configured. You can continue without a photo.');
+          }
           return null;
         }
       }),
@@ -96,15 +107,12 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
       analytics.photoUploaded(newPhotos.length);
     }
 
-    if (storageUnavailable) {
-      setUploadError('Photo storage is not configured — you can continue without a photo.');
-    } else if (uploaded.length < toUpload.length) {
-      setUploadError(
-        uploaded.length === 0
-          ? 'Photos failed to upload — please try again.'
-          : `${toUpload.length - uploaded.length} photo(s) failed to upload.`,
-      );
+    if (!uploadError && uploaded.length < toUpload.length && uploaded.length === 0) {
+      setUploadError('Photos failed to upload. Please try again.');
+    } else if (!uploadError && uploaded.length < toUpload.length) {
+      setUploadError(`${toUpload.length - uploaded.length} photo(s) failed to upload.`);
     }
+
     setUploading(false);
   };
 
@@ -121,7 +129,26 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'));
+    if (!hasConsented) {
+      setShowConsentDialog(true);
+      return;
+    }
     void uploadFiles(files);
+  };
+
+  const handleUploadClick = () => {
+    if (uploading) return;
+    if (!hasConsented) {
+      setShowConsentDialog(true);
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  const handleConsentAccept = () => {
+    setHasConsented(true);
+    setShowConsentDialog(false);
+    fileInputRef.current?.click();
   };
 
   const canAddMore = state.photos.length < MAX_PHOTOS && !uploading;
@@ -148,9 +175,68 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
         </p>
       </div>
 
+      {/* Photo consent dialog */}
+      <Dialog open={showConsentDialog} onOpenChange={setShowConsentDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl font-semibold text-forest flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-sage" />
+              Before you upload
+            </DialogTitle>
+            <DialogDescription className="font-sans text-forest/60 text-sm mt-1">
+              A quick note about how we use your photos.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm font-sans text-forest/70 leading-relaxed">
+            <p>Your photos are used <strong className="text-forest">only</strong> to personalize your vision board by placing you inside the AI-generated imagery.</p>
+            <ul className="space-y-1.5 pl-4">
+              <li className="flex items-start gap-2">
+                <span className="text-sage mt-0.5">✓</span>
+                Stored securely and privately
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-sage mt-0.5">✓</span>
+                Never shared publicly or with third parties
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-sage mt-0.5">✓</span>
+                Not used to train AI models
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-sage mt-0.5">✓</span>
+                Deletable on request at any time
+              </li>
+            </ul>
+            <p className="text-forest/50 text-xs">
+              By uploading, you confirm you have the right to use these photos.{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-forest/70">
+                Full Privacy Policy
+              </a>
+            </p>
+          </div>
+          <div className="flex gap-3 pt-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1"
+              onClick={() => setShowConsentDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="flex-1 bg-sage hover:bg-sage/90"
+              onClick={handleConsentAccept}
+            >
+              I understand, continue
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Photo upload */}
       <div className="flex flex-col gap-3">
-        {/* Section header with clear callout */}
         <div className="flex items-start justify-between">
           <Label className="text-sm font-semibold text-forest/80">
             Your photos{' '}
@@ -167,10 +253,6 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
             </p>
             <p className="font-sans text-xs text-forest/60 mt-0.5 leading-relaxed">
               Upload photos of <strong>yourself</strong> and our AI will place you inside the vision board, living your dream life as if it&apos;s already real.
-            </p>
-            <p className="font-sans text-[11px] text-forest/40 mt-1.5">
-              Your photos are used only to personalize your board and are never shared publicly.{' '}
-              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-forest/60">Privacy Policy</a>
             </p>
           </div>
         </div>
@@ -189,7 +271,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
           <div
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
-            onClick={() => !uploading && fileInputRef.current?.click()}
+            onClick={handleUploadClick}
             className={cn(
               'border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-3 transition-all duration-200',
               uploading
@@ -274,9 +356,9 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
                   key={value}
                   type="button"
                   onClick={() => {
-                    const next = state.gender === value ? null : value;
-                    update({ gender: next });
-                    if (next) analytics.genderSelected(next);
+                    const nextVal = state.gender === value ? null : value;
+                    update({ gender: nextVal });
+                    if (nextVal) analytics.genderSelected(nextVal);
                   }}
                   className={cn(
                     'flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-sans text-sm font-medium transition-all duration-200',
