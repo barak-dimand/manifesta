@@ -142,6 +142,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global keyboard focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-sage);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* Dream Explorer priority sliders */
 .dream-slider {
   appearance: none;
@@ -172,4 +179,9 @@ body {
   border: 2px solid white;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   cursor: pointer;
+}
+.dream-slider:focus-visible {
+  outline: 2px solid var(--color-sage);
+  outline-offset: 4px;
+  border-radius: 4px;
 }

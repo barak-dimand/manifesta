@@ -300,9 +300,9 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
 
         {/* Title */}
         <div>
-          <h3 className="font-display text-xl font-semibold text-forest leading-snug mb-1">
+          <h2 className="font-display text-xl font-semibold text-forest leading-snug mb-1">
             How much do you want each one, and how much do you believe you can have it?
-          </h3>
+          </h2>
           <p className="font-sans text-xs text-forest/50">
             Slide from 1 to 10. We&apos;ll sort your manifesto so what you want most and believe in most rises to the top.
           </p>
@@ -350,6 +350,10 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
                       value={want}
                       onChange={(e) => setPriority(item.text, 'want', Number(e.target.value))}
                       className="dream-slider w-full"
+                      aria-label={`How much I want: ${item.text}`}
+                      aria-valuemin={1}
+                      aria-valuemax={10}
+                      aria-valuenow={want}
                       style={{
                         background: `linear-gradient(to right, var(--color-sage) ${wantPct}%, hsl(150,18%,82%) ${wantPct}%)`,
                       }}
@@ -372,6 +376,10 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
                       value={believe}
                       onChange={(e) => setPriority(item.text, 'believe', Number(e.target.value))}
                       className="dream-slider w-full"
+                      aria-label={`How much I believe in: ${item.text}`}
+                      aria-valuemin={1}
+                      aria-valuemax={10}
+                      aria-valuenow={believe}
                       style={{
                         background: `linear-gradient(to right, var(--color-sage) ${believePct}%, hsl(150,18%,82%) ${believePct}%)`,
                       }}
@@ -466,9 +474,9 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
             <div className="mt-0.5 w-8 h-8 rounded-full bg-sage/15 flex items-center justify-center flex-shrink-0">
               <Lightbulb className="h-4 w-4 text-sage" />
             </div>
-            <h3 className="font-display text-xl font-semibold text-forest leading-snug">
+            <h2 className="font-display text-xl font-semibold text-forest leading-snug">
               {prompt.question}
-            </h3>
+            </h2>
           </div>
 
           {/* Suggestion chips */}
@@ -505,7 +513,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
                         type="button"
                         onClick={() => toggleSuggestion(idx)}
                         className="px-2 py-2 text-white/60 hover:text-white transition-colors"
-                        title="Remove"
+                        aria-label="Remove this item"
                       >
                         ✕
                       </button>
@@ -540,7 +548,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
                           setEditing([currentPrompt, idx]);
                         }}
                         className="opacity-60 hover:opacity-100 transition-opacity ml-0.5"
-                        title="Edit text"
+                        aria-label="Edit this item"
                       >
                         <Pencil className="h-2.5 w-2.5" />
                       </button>
