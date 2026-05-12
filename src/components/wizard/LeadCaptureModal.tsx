@@ -149,11 +149,11 @@ export function LeadCaptureModal({
 
           <p className="text-xs text-center text-forest/40 font-sans">
             By continuing you agree to our{' '}
-            <a href="#" className="underline hover:text-forest/60">
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-forest/60">
               Terms
             </a>{' '}
             and{' '}
-            <a href="#" className="underline hover:text-forest/60">
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-forest/60">
               Privacy Policy
             </a>
             .

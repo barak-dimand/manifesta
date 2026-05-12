@@ -168,6 +168,10 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
             <p className="font-sans text-xs text-forest/60 mt-0.5 leading-relaxed">
               Upload photos of <strong>yourself</strong> and our AI will place you inside the vision board — living your dream life as if it&apos;s already real.
             </p>
+            <p className="font-sans text-[11px] text-forest/40 mt-1.5">
+              Your photos are used only to personalize your board and are never shared publicly.{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline hover:text-forest/60">Privacy Policy</a>
+            </p>
           </div>
         </div>
 
