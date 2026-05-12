@@ -28,7 +28,7 @@ const tiers: Tier[] = [
     badge: 'MOST POPULAR',
     name: 'Manifesta Dream Card',
     price: '$19',
-    tagline: 'Your dream board + a personal manifesto — a declaration of the life you\'re calling in.',
+    tagline: 'Your dream board plus a personal manifesto: a declaration of the life you\'re calling in.',
     bullets: [
       'Custom manifesto written for you',
       'Beautifully designed PDF',
@@ -60,7 +60,7 @@ const tiers: Tier[] = [
     name: 'Daily Life Coach',
     price: '$17',
     period: '/month',
-    tagline: 'Your AI coach in your inbox every morning — motivation, vision images, and reminders.',
+    tagline: 'Your AI coach in your inbox every morning: motivation, vision images, and reminders.',
     bullets: [
       'Daily personalized message',
       'AI-generated vision images',
@@ -119,19 +119,19 @@ export function PricingSection() {
                 </div>
                 <h3 className="font-display text-xl font-semibold text-forest">Dream Board Wallpaper</h3>
                 <p className="font-sans text-sm text-forest/60 mt-0.5">
-                  Your personalized AI vision board, hand-crafted and delivered to your inbox within 24 hours.
+                  Your personalized AI vision board, hand-crafted and delivered to your inbox within 5 days.
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-3 sm:flex-col sm:gap-2 sm:items-end">
-              {['Personalized to your dreams', 'Phone & desktop sizes', 'In your inbox in 24 hrs'].map((b) => (
+              {['Personalized to your dreams', 'Phone & desktop sizes', 'In your inbox in 5 days'].map((b) => (
                 <span key={b} className="flex items-center gap-1.5 font-sans text-xs text-forest/65">
                   <Check className="w-3.5 h-3.5 text-gold flex-shrink-0" /> {b}
                 </span>
               ))}
             </div>
             <Button variant="gold" size="lg" className="sm:self-center flex-shrink-0 px-8" asChild>
-              <Link href="/create" onClick={() => analytics.landingCtaClicked('pricing')}>Create Mine — Free</Link>
+              <Link href="/create" onClick={() => analytics.landingCtaClicked('pricing')}>Create Mine, Free</Link>
             </Button>
           </div>
         </motion.div>
@@ -224,7 +224,7 @@ export function PricingSection() {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-center text-sm font-sans text-forest/45 mt-8"
         >
-          Wallpaper is always free — no credit card required. Add upgrades any time during the flow.
+          Wallpaper is always free. No credit card required. Add upgrades any time during the flow.
         </motion.p>
       </div>
     </section>

@@ -7,13 +7,13 @@ const features = [
   {
     icon: Sparkles,
     title: 'Dream Board Wallpaper',
-    description: 'Your personalized AI vision board — hand-crafted from your dreams and delivered to your inbox within 24 hours. Free, always.',
+    description: 'Your personalized AI vision board, hand-crafted from your dreams and delivered to your inbox within 5 days. Free, always.',
     tag: 'Free',
   },
   {
     icon: FileText,
     title: 'Manifesta Dream Card',
-    description: 'A beautifully designed PDF with your dream board and a written manifesto — your personal declaration of the life you\'re building. Read it every morning and every night.',
+    description: 'A beautifully designed PDF with your dream board and a written manifesto: your personal declaration of the life you\'re building. Read it every morning and every night.',
     tag: '$19',
   },
   {
@@ -25,19 +25,19 @@ const features = [
   {
     icon: Mail,
     title: 'Daily Life Coach Emails',
-    description: 'A personalized morning email with motivation, AI-generated vision images, and habit reminders — your coach in your pocket, every single day.',
+    description: 'A personalized morning email with motivation, AI-generated vision images, and habit reminders. Your coach in your pocket, every single day.',
     tag: '$17/mo',
   },
   {
     icon: Camera,
     title: 'Personalized with Your Photos',
-    description: 'Upload a photo of yourself and we\'ll place you as the main character in your vision board — making it viscerally real, not just aspirational.',
+    description: 'Upload a photo of yourself and we\'ll place you as the main character in your vision board, making it viscerally real, not just aspirational.',
     tag: 'Included',
   },
   {
     icon: Shield,
     title: 'Your Dreams Stay Yours',
-    description: 'Your answers are private, secure, and never shared. This is your sacred space to dream boldly and honestly — no judgment, no exposure.',
+    description: 'Your answers are private, secure, and never shared. This is your sacred space to dream boldly and honestly. No judgment, no exposure.',
     tag: 'Always',
   },
 ];
@@ -71,7 +71,7 @@ export function FeaturesSection() {
             A Complete Manifestation System
           </h2>
           <p className="mt-4 text-forest/60 font-sans text-lg max-w-xl mx-auto">
-            From a free dream board to a full daily practice — everything you need to close the gap between where you are and where you want to be.
+            From a free dream board to a full daily practice. Everything you need to close the gap between where you are and where you want to be.
           </p>
         </motion.div>
 

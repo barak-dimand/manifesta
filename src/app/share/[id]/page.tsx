@@ -81,7 +81,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
             <div className="rounded-2xl border-2 border-dashed border-sage/25 bg-sage-light/20 flex flex-col items-center justify-center gap-3 py-16 px-8 text-center">
               <Sparkles className="w-8 h-8 text-gold/60" />
               <p className="font-display text-lg text-forest/60">Dream board being crafted…</p>
-              <p className="font-sans text-xs text-forest/40">Arriving within 24 hours</p>
+              <p className="font-sans text-xs text-forest/40">Arriving within 5 days</p>
             </div>
           )}
 
@@ -97,7 +97,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
               <p className="font-display text-base font-semibold text-forest">Create your own dream board</p>
             </div>
             <p className="font-sans text-xs text-forest/60">
-              Free, personalized, and delivered to your inbox within 24 hours.
+              Free, personalized, and delivered to your inbox within 5 days.
             </p>
             <Link
               href="/create?new=1"

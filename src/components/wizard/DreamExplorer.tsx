@@ -34,7 +34,7 @@ const EXPLORATION_PROMPTS = [
       "Building an app or tech product that changes millions of lives",
       "Writing books and sharing my ideas on global stages",
       "Designing beautiful spaces as an interior architect",
-      "Creating content full-time — videos, podcasts, and writing",
+      "Creating content full-time: videos, podcasts, and writing",
       "Working in fashion or beauty, launching my own brand",
     ],
   },
@@ -55,16 +55,16 @@ const EXPLORATION_PROMPTS = [
   },
   {
     question: "How does your body feel? What does your health look like?",
-    placeholder: "e.g., Strong, energized, glowing — I move my body joyfully every day…",
+    placeholder: "e.g., Strong, energized, glowing. I move my body joyfully every day…",
     category: "health",
     suggestions: [
-      "Strong, toned, and full of energy — I feel amazing every morning",
+      "Strong, toned, and full of energy. I feel amazing every morning",
       "Calm, balanced, and deeply at peace with daily meditation practice",
       "Flexible and powerful from a consistent yoga and movement routine",
       "Glowing skin, bright eyes, and vibrant health from nourishing food",
-      "Running marathons, hiking mountains — my body is capable of anything",
+      "Running marathons, hiking mountains. My body is capable of anything",
       "Sleeping deeply, waking refreshed, with a clear and focused mind",
-      "Dancing, swimming, surfing — I move my body with pure joy",
+      "Dancing, swimming, surfing. I move my body with pure joy",
       "Mentally sharp, emotionally resilient, and spiritually grounded",
     ],
   },
@@ -74,11 +74,11 @@ const EXPLORATION_PROMPTS = [
     category: "experiences",
     suggestions: [
       "Exploring a new country every month and immersing in local culture",
-      "Creating art — painting, sculpting, or making music that moves people",
+      "Creating art: painting, sculpting, or making music that moves people",
       "Attending incredible events: fashion weeks, film festivals, galleries",
       "Learning new languages and connecting with people everywhere",
       "Cooking gourmet meals and hosting beautiful dinner parties",
-      "Skydiving, scuba diving, surfing — chasing adventure and adrenaline",
+      "Skydiving, scuba diving, surfing. Chasing adventure and adrenaline",
       "Volunteering and giving back to communities that need it most",
       "Reading, journaling, and growing into the wisest version of myself",
     ],
@@ -289,7 +289,7 @@ export function DreamExplorer({ onComplete, initialPromptStates, onStateChange, 
         {/* Title */}
         <div>
           <h3 className="font-display text-xl font-semibold text-forest leading-snug mb-1">
-            How much do you want each one — and how much do you believe you can have it?
+            How much do you want each one, and how much do you believe you can have it?
           </h3>
           <p className="font-sans text-xs text-forest/50">
             Slide from 1 to 10. We&apos;ll sort your manifesto so what you want most and believe in most rises to the top.

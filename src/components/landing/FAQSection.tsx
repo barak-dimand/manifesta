@@ -9,7 +9,7 @@ const faqs = [
   {
     question: 'What is a dream board?',
     answer:
-      'A dream board (or vision board) is a visual representation of your ideal life — the goals, feelings, places, relationships, and experiences you want to attract. Seeing it daily keeps your subconscious focused on what matters, turning passive wishes into active intentions.',
+      'A dream board (or vision board) is a visual representation of your ideal life: the goals, feelings, places, relationships, and experiences you want to attract. Seeing it daily keeps your subconscious focused on what matters, turning passive wishes into active intentions.',
   },
   {
     question: 'How does the AI create my board?',

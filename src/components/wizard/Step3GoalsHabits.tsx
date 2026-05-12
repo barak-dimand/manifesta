@@ -89,7 +89,7 @@ const HABIT_SUGGESTIONS: Record<LifeArea, string[]> = {
   health: [
     'Move my body for 30 minutes every morning',
     'Drink 2L of water and eat a nourishing breakfast daily',
-    'Be in bed by 10:30pm — no screens, no exceptions',
+    'Be in bed by 10:30pm, no screens, no exceptions',
     'Meditate or breathe deeply for 10 minutes each morning',
   ],
   travel: [
@@ -105,7 +105,7 @@ const HABIT_SUGGESTIONS: Record<LifeArea, string[]> = {
     'Find and cancel one unnecessary subscription monthly',
   ],
   creativity: [
-    'Create something — write, draw, or build — for 20 min daily',
+    'Create something (write, draw, or build) for 20 min daily',
     'Share one piece of my work publicly every week',
     'Spend 30 min with inspiring books, art, or film daily',
     'Attend one creative class or workshop per month',

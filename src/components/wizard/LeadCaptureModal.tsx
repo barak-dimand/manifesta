@@ -97,7 +97,7 @@ export function LeadCaptureModal({
             Save your dream board
           </DialogTitle>
           <DialogDescription className="font-sans text-forest/60 text-sm mt-1">
-            Enter your email to save your board and set up daily reminders. No spam — only your
+            Enter your email to save your board and set up daily reminders. No spam, only your
             dream life, delivered every morning.
           </DialogDescription>
         </DialogHeader>
