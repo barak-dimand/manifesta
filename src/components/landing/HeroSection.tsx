@@ -73,7 +73,7 @@ export function HeroSection() {
             <motion.div variants={itemVariants}>
               <Badge variant="gold" className="gap-1.5 px-3 py-1 text-xs font-semibold">
                 <Sparkles className="w-3 h-3" />
-                Free Dream Board — No Credit Card
+                Free Dream Board, No Credit Card
               </Badge>
             </motion.div>
 
@@ -91,7 +91,7 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-xl text-forest/65 font-sans leading-relaxed max-w-md"
             >
-              Get your personalized AI dream board wallpaper — free, delivered to your inbox within 24 hours.
+              Get your personalized AI dream board wallpaper. Free, delivered to your inbox within 5 days.
               <br />
               <span className="text-forest/50 text-lg">Deepen your practice with meditations, a manifesto PDF, and daily coaching.</span>
             </motion.p>

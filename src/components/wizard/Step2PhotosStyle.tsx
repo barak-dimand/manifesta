@@ -166,7 +166,7 @@ export function Step2PhotosStyle({ state, update, next }: Step2Props) {
               See yourself in your dream life
             </p>
             <p className="font-sans text-xs text-forest/60 mt-0.5 leading-relaxed">
-              Upload photos of <strong>yourself</strong> and our AI will place you inside the vision board — living your dream life as if it&apos;s already real.
+              Upload photos of <strong>yourself</strong> and our AI will place you inside the vision board, living your dream life as if it&apos;s already real.
             </p>
           </div>
         </div>

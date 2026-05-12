@@ -8,9 +8,9 @@ const FROM = () => process.env.RESEND_FROM_EMAIL || 'hello@joinmanifesta.com';
 
 const OFFER_LABELS: Record<string, string> = {
   wallpaper: 'Dream Board Wallpaper (Free)',
-  'dream-card': 'Manifesta Dream Card — $19',
-  meditations: 'Guided Manifestation Meditations — $39',
-  'life-coach': 'Daily Life Coach Emails — $17/month',
+  'dream-card': 'Manifesta Dream Card ($19)',
+  meditations: 'Guided Manifestation Meditations ($39)',
+  'life-coach': 'Daily Life Coach Emails ($17/month)',
 };
 
 export async function sendWelcomeEmail(to: string, manifesto: string) {
@@ -105,7 +105,7 @@ export async function sendBoardConfirmation({
               <td style="padding:40px;">
                 <h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#162420;margin:0 0 12px;">${greeting}</h2>
                 <p style="font-size:15px;line-height:1.7;color:#2b4a40;margin:0 0 24px;">
-                  Your dream board is officially in motion. We&apos;re crafting everything by hand and you&apos;ll receive it within <strong>24 hours</strong>.
+                  Your dream board is officially in motion. We&apos;re crafting everything by hand and you&apos;ll receive it within <strong>5 days</strong>.
                 </p>
                 <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:10px;border:1px solid #d4ddd9;margin-bottom:24px;">
                   <tr>
@@ -270,7 +270,7 @@ export async function sendVisionBoardReady({
               <td style="padding:40px;">
                 <h2 style="font-family:Georgia,serif;font-size:22px;font-weight:400;color:#162420;margin:0 0 12px;">${greeting}</h2>
                 <p style="font-size:15px;line-height:1.7;color:#2b4a40;margin:0 0 28px;">
-                  Your personalized vision board has been crafted and is ready for you. See it below and save it to your home screen — look at it every day.
+                  Your personalized vision board has been crafted and is ready for you. See it below and save it to your home screen. Look at it every day.
                 </p>
 
                 <!-- Vision board image -->
@@ -328,7 +328,7 @@ export async function sendDailyAffirmation(
   return getResend().emails.send({
     from: FROM(),
     to,
-    subject: 'Good morning — your dream life reminder 🌅',
+    subject: 'Good morning: your dream life reminder 🌅',
     html: `
       <!DOCTYPE html>
       <html>

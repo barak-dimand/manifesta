@@ -42,7 +42,7 @@ export function ExamplesSection() {
             Real Dream Boards, Real Visions
           </h2>
           <p className="mt-4 text-forest/60 font-sans text-lg max-w-xl mx-auto">
-            Every board is unique — AI-generated, deeply personal, and designed to keep your dreams
+            Every board is unique: AI-generated, deeply personal, and designed to keep your dreams
             front and center.
           </p>
         </motion.div>

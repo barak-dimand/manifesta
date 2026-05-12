@@ -163,7 +163,7 @@ export function Step3Quotes({ state, update, next }: Step3Props) {
           Words that move you
         </h1>
         <p className="font-sans text-forest/60 text-base">
-          Choose quotes that resonate — tap to select, tap the pencil to make them your own, or write something new.
+          Choose quotes that resonate. Tap to select, tap the pencil to make them your own, or write something new.
         </p>
       </div>
 

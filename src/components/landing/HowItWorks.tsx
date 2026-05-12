@@ -9,7 +9,7 @@ const steps = [
     icon: Wand2,
     title: 'Tell Us Your Dream Life',
     description:
-      'Answer a few guided questions about the life you want to live — your career, relationships, health, and everything that matters most. Takes about 5 minutes.',
+      'Answer a few guided questions about the life you want to live: your career, relationships, health, and everything that matters most. Takes about 5 minutes.',
   },
   {
     number: '02',
@@ -23,7 +23,7 @@ const steps = [
     icon: Inbox,
     title: 'Receive It. Live It.',
     description:
-      'Your dream board lands in your inbox within 24 hours. Set it as your wallpaper. Read your manifesto. Let it pull you closer to your dream life every single day.',
+      'Your dream board lands in your inbox within 5 days. Set it as your wallpaper. Read your manifesto. Let it pull you closer to your dream life every single day.',
   },
 ];
 

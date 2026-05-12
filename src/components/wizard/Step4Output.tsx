@@ -37,10 +37,10 @@ const OFFERS: Offer[] = [
   {
     id: 'wallpaper',
     Icon: Sparkles,
-    badge: 'ALWAYS INCLUDED — FREE',
+    badge: 'ALWAYS INCLUDED | FREE',
     title: 'Dream Board Wallpaper',
-    tagline: 'Your personalized AI vision board, delivered to your email within 24 hours.',
-    bullets: ['Custom AI-generated wallpaper', 'Phone & desktop sizes', 'Delivered within 24 hours'],
+    tagline: 'Your personalized AI vision board, delivered to your email within 5 days.',
+    bullets: ['Custom AI-generated wallpaper', 'Phone & desktop sizes', 'Delivered within 5 days'],
     priceLabel: 'Free',
     free: true,
   },
@@ -49,7 +49,7 @@ const OFFERS: Offer[] = [
     Icon: Star,
     badge: 'MOST POPULAR',
     title: 'Manifesta Dream Card',
-    tagline: 'A beautifully designed PDF with your dream board + a personal manifesto — your declaration of the life you\'re calling in.',
+    tagline: 'A beautifully designed PDF with your dream board plus a personal manifesto: your declaration of the life you\'re calling in.',
     bullets: ['Custom manifesto written for you', 'Print-quality PDF design', 'Yours to print & frame'],
     priceLabel: '$19',
     free: false,
@@ -70,7 +70,7 @@ const OFFERS: Offer[] = [
     Icon: Mail,
     badge: null,
     title: 'Daily Life Coach Emails',
-    tagline: 'Your AI coach in your inbox every morning — motivation, personalized vision images, and habit reminders.',
+    tagline: 'Your AI coach in your inbox every morning: motivation, personalized vision images, and habit reminders.',
     bullets: ['Daily personalized message', 'AI-generated vision images', 'Cancel anytime'],
     priceLabel: '$17/month',
     free: false,
@@ -237,9 +237,9 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
           <p className="font-sans text-forest/60 text-base max-w-sm mx-auto">
             Your dream board is being crafted with care.
             {email && (
-              <> We&apos;ll send it to <strong className="text-forest">{email}</strong> within 24 hours.</>
+              <> We&apos;ll send it to <strong className="text-forest">{email}</strong> within 5 days.</>
             )}
-            {!email && ' We\'ll email your dream board within 24 hours.'}
+            {!email && ' We\'ll email your dream board within 5 days.'}
           </p>
         </div>
 
@@ -253,7 +253,7 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
               </div>
               <div>
                 <p className="font-sans text-sm font-semibold text-forest">{o.title}</p>
-                <p className="font-sans text-xs text-forest/50">{o.free ? 'Free — arriving within 24 hours' : `${o.priceLabel} — we'll reach out to complete this`}</p>
+                <p className="font-sans text-xs text-forest/50">{o.free ? 'Free, arriving within 5 days' : `${o.priceLabel}, we'll reach out to complete this`}</p>
               </div>
             </div>
           ))}
@@ -298,7 +298,7 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
           Your Dream Life Awaits
         </h1>
         <p className="font-sans text-forest/60 text-base max-w-sm mx-auto">
-          Your personalized dream board is being crafted — choose how far you want to take your journey.
+          Your personalized dream board is being crafted. Choose how far you want to take your journey.
         </p>
       </div>
 
@@ -435,8 +435,8 @@ export function Step4Output({ state, update, onReset }: Step4Props) {
 
         <p className="font-sans text-xs text-center text-forest/40">
           {isSignedIn
-            ? 'Your board will be saved and your wallpaper sent within 24 hours.'
-            : 'You\'ll be asked to create a free account — it takes 30 seconds.'}
+            ? 'Your board will be saved and your wallpaper sent within 5 days.'
+            : 'You\'ll be asked to create a free account. It takes 30 seconds.'}
         </p>
       </div>
     </div>
