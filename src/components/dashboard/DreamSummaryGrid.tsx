@@ -32,7 +32,7 @@ export function DreamSummaryGrid({ board }: Props) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {/* Life Areas */}
-      <div className="rounded-2xl border border-sage/15 bg-white/60 p-4 flex flex-col gap-3">
+      <div className="rounded-2xl border border-white/40 bg-white/70 backdrop-blur-md p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-3.5 h-3.5 text-sage" />
           <p className="font-sans text-xs font-semibold text-forest/70">Life Areas</p>
@@ -54,7 +54,7 @@ export function DreamSummaryGrid({ board }: Props) {
       </div>
 
       {/* Goals & Habits */}
-      <div className="rounded-2xl border border-sage/15 bg-white/60 p-4 flex flex-col gap-3">
+      <div className="rounded-2xl border border-white/40 bg-white/70 backdrop-blur-md p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Target className="w-3.5 h-3.5 text-sage" />
           <p className="font-sans text-xs font-semibold text-forest/70">Goals & Habits</p>
@@ -77,7 +77,7 @@ export function DreamSummaryGrid({ board }: Props) {
       </div>
 
       {/* Quotes & Affirmations */}
-      <div className="rounded-2xl border border-sage/15 bg-white/60 p-4 flex flex-col gap-3">
+      <div className="rounded-2xl border border-white/40 bg-white/70 backdrop-blur-md p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Quote className="w-3.5 h-3.5 text-sage" />
           <p className="font-sans text-xs font-semibold text-forest/70">Quotes & Affirmations</p>
@@ -95,7 +95,7 @@ export function DreamSummaryGrid({ board }: Props) {
       </div>
 
       {/* Aesthetic */}
-      <div className="rounded-2xl border border-sage/15 bg-white/60 p-4 flex flex-col gap-3">
+      <div className="rounded-2xl border border-white/40 bg-white/70 backdrop-blur-md p-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Wand2 className="w-3.5 h-3.5 text-sage" />
           <p className="font-sans text-xs font-semibold text-forest/70">Aesthetic</p>

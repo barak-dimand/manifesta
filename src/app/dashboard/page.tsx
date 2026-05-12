@@ -58,6 +58,8 @@ export default async function DashboardPage() {
 
   const featuredBoard = userBoards[0] ?? null;
   const otherBoards = userBoards.slice(1);
+  const latestImageUrl = userImages[0]?.imageUrl ?? null;
+  const hasImage = !!latestImageUrl;
 
   const isPaid =
     (featuredBoard?.selectedOffers as string[] | null)?.some((o) =>
@@ -68,136 +70,217 @@ export default async function DashboardPage() {
   const email = user?.emailAddresses[0]?.emailAddress ?? '';
 
   return (
-    <div className="min-h-screen bg-cream">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur-md border-b border-sage/10 px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 font-sans text-sm text-forest/60 hover:text-forest transition-colors"
-          >
-            <span className="text-base">←</span>
-            Home
-          </Link>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-sage/20 text-xs font-sans font-medium text-forest/60">
-            <Sparkles className="w-3 h-3 text-gold" />
-            {isPaid ? 'Dreamer (Pro)' : 'Dreamer (Free)'}
-          </div>
-        </div>
-      </header>
+    <div
+      className="min-h-screen"
+      style={
+        hasImage
+          ? {
+              backgroundImage: `url(${latestImageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center top',
+            }
+          : undefined
+      }
+    >
+      {/* Dark overlay when image is present; plain cream otherwise */}
+      <div className={hasImage ? 'min-h-screen bg-black/50' : 'min-h-screen bg-cream'}>
 
-      <main id="main-content" className="max-w-2xl mx-auto px-4 py-10">
-
-        {featuredBoard ? (
-          <div className="flex flex-col gap-10">
-
-            {/* ── Hero ──────────────────────────────────────────────── */}
-            <div className="flex flex-col items-center text-center gap-2">
-              <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-sage-light/60 border border-sage/20 text-xs font-sans font-semibold text-sage uppercase tracking-wider">
-                <Sparkles className="w-3 h-3" />
-                Your Dream Board
-              </div>
-              <h1 className="font-display text-4xl font-semibold text-forest mt-1">
-                Welcome back, {firstName} ✦
-              </h1>
-              {email && (
-                <p className="font-sans text-sm text-forest/45">
-                  Daily reminders going to{' '}
-                  <span className="font-medium text-forest/60">{email}</span>
-                </p>
-              )}
-            </div>
-
-            {/* ── My Manifesto ─────────────────────────────────────── */}
-            <ManifestoCard board={featuredBoard} isPaid={isPaid} />
-
-            {/* ── Summary Grid ─────────────────────────────────────── */}
-            <DreamSummaryGrid board={featuredBoard} />
-
-            {/* ── Discover ─────────────────────────────────────────── */}
-            <DiscoverSection board={featuredBoard} />
-
-            {/* ── Dream Board Images ───────────────────────────────── */}
-            {userImages.length > 0 && (
-              <section className="flex flex-col gap-5">
-                <div>
-                  <h2 className="font-display text-2xl font-semibold text-forest">Dream Board Images</h2>
-                  <p className="font-sans text-xs text-forest/45 mt-1">
-                    {remaining > 0
-                      ? `${remaining} generation${remaining === 1 ? '' : 's'} remaining today`
-                      : 'Daily limit reached — resets tomorrow'}
-                  </p>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {userImages.map((img) => (
-                    <WallpaperCard key={img.id} image={img} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* ── No images yet ────────────────────────────────────── */}
-            {userImages.length === 0 && (
-              <section className="rounded-2xl border-2 border-dashed border-sage/20 px-8 py-10 flex flex-col items-center text-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-gold/50" />
-                </div>
-                <div>
-                  <p className="font-display text-lg font-semibold text-forest/60">
-                    Your dream board image is on its way
-                  </p>
-                  <p className="font-sans text-sm text-forest/40 mt-1">
-                    We&apos;ll email your AI-generated wallpaper within 5 days.
-                  </p>
-                </div>
-              </section>
-            )}
-
-            {/* ── Past Boards ──────────────────────────────────────── */}
-            {otherBoards.length > 0 && (
-              <section className="flex flex-col gap-5">
-                <div>
-                  <h2 className="font-display text-2xl font-semibold text-forest">Past Boards</h2>
-                  <p className="font-sans text-xs text-forest/45 mt-1">
-                    {otherBoards.length} previous board{otherBoards.length === 1 ? '' : 's'}
-                  </p>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {otherBoards.map((board) => (
-                    <BoardCard key={board.id} board={board} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-          </div>
-        ) : (
-          /* ── Empty state ──────────────────────────────────────────── */
-          <div className="flex flex-col items-center text-center gap-8 pt-10">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-gold/50" />
-              </div>
-              <div>
-                <h1 className="font-display text-3xl font-semibold text-forest mb-2">
-                  Welcome, {firstName}
-                </h1>
-                <p className="font-sans text-sm text-forest/50">
-                  Create your first dream board to get started.
-                </p>
-              </div>
-            </div>
+        {/* ── Header ────────────────────────────────────────────────────── */}
+        <header
+          className={`sticky top-0 z-40 backdrop-blur-md border-b px-4 py-3 ${
+            hasImage
+              ? 'bg-black/25 border-white/10'
+              : 'bg-cream/95 border-sage/10'
+          }`}
+        >
+          <div className="max-w-2xl mx-auto flex items-center justify-between">
             <Link
-              href="/create?new=1"
-              className="flex items-center gap-2 bg-gold text-forest font-sans text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-gold/90 transition-colors shadow-sm"
+              href="/"
+              className={`flex items-center gap-1.5 font-sans text-sm transition-colors ${
+                hasImage
+                  ? 'text-white/70 hover:text-white'
+                  : 'text-forest/60 hover:text-forest'
+              }`}
             >
-              <Plus className="w-4 h-4" />
-              Create My Dream Board
+              <span className="text-base">←</span>
+              Home
             </Link>
+            <div
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-sans font-medium ${
+                hasImage
+                  ? 'bg-white/15 border-white/20 text-white'
+                  : 'bg-white border-sage/20 text-forest/60'
+              }`}
+            >
+              <Sparkles className={`w-3 h-3 ${hasImage ? 'text-gold' : 'text-gold'}`} />
+              {isPaid ? 'Dreamer (Pro)' : 'Dreamer (Free)'}
+            </div>
           </div>
-        )}
+        </header>
 
-      </main>
+        <main id="main-content" className="max-w-2xl mx-auto px-4 py-10">
+
+          {featuredBoard ? (
+            <div className="flex flex-col gap-10">
+
+              {/* ── Hero ────────────────────────────────────────────── */}
+              <div className="flex flex-col items-center text-center gap-2">
+                <div
+                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-xs font-sans font-semibold uppercase tracking-wider ${
+                    hasImage
+                      ? 'bg-white/15 border-white/20 text-white'
+                      : 'bg-sage-light/60 border-sage/20 text-sage'
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Your Dream Board
+                </div>
+                <h1
+                  className={`font-display text-4xl font-semibold mt-1 ${
+                    hasImage ? 'text-white drop-shadow-md' : 'text-forest'
+                  }`}
+                >
+                  Welcome back, {firstName} ✦
+                </h1>
+                {email && (
+                  <p
+                    className={`font-sans text-sm ${
+                      hasImage ? 'text-white/65' : 'text-forest/45'
+                    }`}
+                  >
+                    Daily reminders going to{' '}
+                    <span className={hasImage ? 'font-medium text-white/80' : 'font-medium text-forest/60'}>
+                      {email}
+                    </span>
+                  </p>
+                )}
+              </div>
+
+              {/* ── My Manifesto ──────────────────────────────────── */}
+              <ManifestoCard board={featuredBoard} isPaid={isPaid} />
+
+              {/* ── Summary Grid ──────────────────────────────────── */}
+              <DreamSummaryGrid board={featuredBoard} />
+
+              {/* ── Discover ──────────────────────────────────────── */}
+              <DiscoverSection board={featuredBoard} />
+
+              {/* ── Dream Board Images ────────────────────────────── */}
+              {userImages.length > 0 && (
+                <section className="flex flex-col gap-5">
+                  <div>
+                    <h2
+                      className={`font-display text-2xl font-semibold ${
+                        hasImage ? 'text-white drop-shadow-sm' : 'text-forest'
+                      }`}
+                    >
+                      Dream Board Images
+                    </h2>
+                    <p
+                      className={`font-sans text-xs mt-1 ${
+                        hasImage ? 'text-white/60' : 'text-forest/45'
+                      }`}
+                    >
+                      {remaining > 0
+                        ? `${remaining} generation${remaining === 1 ? '' : 's'} remaining today`
+                        : 'Daily limit reached — resets tomorrow'}
+                    </p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {userImages.map((img) => (
+                      <WallpaperCard key={img.id} image={img} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* ── No images yet ─────────────────────────────────── */}
+              {userImages.length === 0 && (
+                <section
+                  className={`rounded-2xl border-2 border-dashed px-8 py-10 flex flex-col items-center text-center gap-3 ${
+                    hasImage
+                      ? 'border-white/20 bg-white/10 backdrop-blur-sm'
+                      : 'border-sage/20'
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-gold/70" />
+                  </div>
+                  <div>
+                    <p
+                      className={`font-display text-lg font-semibold ${
+                        hasImage ? 'text-white' : 'text-forest/60'
+                      }`}
+                    >
+                      Your dream board image is on its way
+                    </p>
+                    <p
+                      className={`font-sans text-sm mt-1 ${
+                        hasImage ? 'text-white/60' : 'text-forest/40'
+                      }`}
+                    >
+                      We&apos;ll email your AI-generated wallpaper within 5 days.
+                    </p>
+                  </div>
+                </section>
+              )}
+
+              {/* ── Past Boards ───────────────────────────────────── */}
+              {otherBoards.length > 0 && (
+                <section className="flex flex-col gap-5">
+                  <div>
+                    <h2
+                      className={`font-display text-2xl font-semibold ${
+                        hasImage ? 'text-white drop-shadow-sm' : 'text-forest'
+                      }`}
+                    >
+                      Past Boards
+                    </h2>
+                    <p
+                      className={`font-sans text-xs mt-1 ${
+                        hasImage ? 'text-white/60' : 'text-forest/45'
+                      }`}
+                    >
+                      {otherBoards.length} previous board{otherBoards.length === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {otherBoards.map((board) => (
+                      <BoardCard key={board.id} board={board} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+            </div>
+          ) : (
+            /* ── Empty state ────────────────────────────────────────── */
+            <div className="flex flex-col items-center text-center gap-8 pt-10">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-gold/50" />
+                </div>
+                <div>
+                  <h1 className="font-display text-3xl font-semibold text-forest mb-2">
+                    Welcome, {firstName}
+                  </h1>
+                  <p className="font-sans text-sm text-forest/50">
+                    Create your first dream board to get started.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/create?new=1"
+                className="flex items-center gap-2 bg-gold text-forest font-sans text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-gold/90 transition-colors shadow-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Create My Dream Board
+              </Link>
+            </div>
+          )}
+
+        </main>
+      </div>
     </div>
   );
 }
