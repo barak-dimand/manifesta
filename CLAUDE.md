@@ -78,3 +78,17 @@ Migrations live in `/drizzle/`. Run `pnpm db:generate` after schema changes, the
 
 ## Pre-commit Hooks
 Husky runs: `lint-staged` (ESLint on staged `.ts/.tsx`) + `gitleaks` (secrets scan, if installed). Commits must follow Conventional Commits format (`feat:`, `fix:`, `chore:`, etc.) — enforced by commitlint.
+
+## Git Workflow
+
+Always work on feature branches — never commit directly to `master`.
+
+Branch naming conventions:
+- `feat/<short-description>` — new user-facing feature
+- `fix/<short-description>` — bug fix
+- `ux/<short-description>` — UX/design improvement
+- `chore/<short-description>` — tooling, config, copy, non-feature work
+- `docs/<short-description>` — documentation only
+
+Create branch: `git checkout -b feat/my-feature`
+Merge via PR or fast-forward after review.
