@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 
 const footerLinks = [
-  { label: 'Privacy Policy', href: '#' },
-  { label: 'Terms of Service', href: '#' },
-  { label: 'Contact', href: '#' },
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Contact', href: 'mailto:hello@joinmanifesta.com' },
 ];
 
 export function Footer() {
