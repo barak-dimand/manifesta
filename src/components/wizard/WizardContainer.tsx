@@ -277,7 +277,7 @@ export function WizardContainer() {
       </div>
 
       {/* Step content */}
-      <div className="flex-1 relative overflow-hidden">
+      <div id="main-content" className="flex-1 relative overflow-hidden">
         <div className="max-w-2xl mx-auto px-4 py-8 min-h-full">
           {/* Back / Home button — hidden on final output step */}
           <AnimatePresence>
