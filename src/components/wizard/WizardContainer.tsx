@@ -104,10 +104,11 @@ export function WizardContainer() {
     analytics.wizardStarted();
   }, []);
 
-  // Track step viewed on every step change
+  // Track step viewed on every step change; also scroll to top
   useEffect(() => {
     const STEP_NAMES = ['Dream Life', 'Photos & Style', 'Quotes', 'Your Journey'];
     analytics.wizardStepViewed(state.step, STEP_NAMES[state.step] ?? '');
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [state.step]);
 
   // Auto-save for EDIT mode only (PUT) — new board save is handled by Step4's Claim button
